@@ -2,15 +2,14 @@
 // Firebase and OpenAI credentials
 
 const CONFIG = {
-    // Firebase Configuration - UPDATED WITH YOUR CREDENTIALS
+    // Firebase Configuration - UPDATED WITH NEW CREDENTIALS
     firebase: {
-        apiKey: "AIzaSyDJseo2G6RWZFq3_KkqZOFJEvfFqeBuUlM",
-        authDomain: "cloudlock-5cdae.firebaseapp.com",
-        projectId: "cloudlock-5cdae",
-        storageBucket: "cloudlock-5cdae.firebasestorage.app",
-        messagingSenderId: "80184504165",
-        appId: "1:80184504165:web:e3be85a4b6c8d83a8ffb8c",
-        measurementId: "G-W55PZP390T"
+        apiKey: "AIzaSyDyHH0DXSEaxb_Ft-cmuGpaCQP8xSx105U",
+        authDomain: "cloudlock-8a59b.firebaseapp.com",
+        projectId: "cloudlock-8a59b",
+        storageBucket: "cloudlock-8a59b.firebasestorage.app",
+        messagingSenderId: "723019842397",
+        appId: "1:723019842397:web:886db24af7ed5587351eb4"
     },
     
     // OpenAI Configuration
