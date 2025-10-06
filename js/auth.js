@@ -1,6 +1,109 @@
-// Authentication Module
+// Authentication Module with Password Strength Indicator
 
 let encryptionKey = null;
+
+// Password requirements validation
+const requirements = {
+    length: password => password.length >= 8,
+    uppercase: password => /[A-Z]/.test(password),
+    lowercase: password => /[a-z]/.test(password),
+    number: password => /[0-9]/.test(password),
+    special: password => /[!@#$%^&*(),.?":{}|<>]/.test(password)
+};
+
+// Initialize password strength checker when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    const passwordInput = document.getElementById('reg-password');
+    const confirmPasswordInput = document.getElementById('reg-confirm');
+    
+    if (passwordInput) {
+        passwordInput.addEventListener('input', updatePasswordStrength);
+    }
+    
+    if (confirmPasswordInput) {
+        confirmPasswordInput.addEventListener('input', updateSubmitButton);
+    }
+});
+
+// Update password strength indicator
+function updatePasswordStrength() {
+    const password = document.getElementById('reg-password').value;
+    const strengthBar = document.getElementById('strengthBar');
+    const strengthText = document.getElementById('strengthText');
+    let metCount = 0;
+
+    // Check each requirement
+    Object.keys(requirements).forEach(req => {
+        const requirementItem = document.querySelector(`[data-requirement="${req}"]`);
+        if (!requirementItem) return;
+        
+        const isMet = requirements[req](password);
+
+        if (isMet) {
+            requirementItem.classList.add('met');
+            metCount++;
+        } else {
+            requirementItem.classList.remove('met');
+        }
+
+        // Add active class when typing
+        if (password.length > 0) {
+            requirementItem.classList.add('active');
+        } else {
+            requirementItem.classList.remove('active');
+        }
+    });
+
+    // Update strength bar
+    if (strengthBar && strengthText) {
+        strengthBar.className = 'strength-bar';
+        if (metCount === 0) {
+            strengthBar.style.width = '0%';
+            strengthText.textContent = '';
+        } else if (metCount <= 2) {
+            strengthBar.classList.add('weak');
+            strengthText.textContent = 'Weak Password';
+            strengthText.style.color = '#ef4444';
+        } else if (metCount === 3) {
+            strengthBar.classList.add('fair');
+            strengthText.textContent = 'Fair Password';
+            strengthText.style.color = '#f59e0b';
+        } else if (metCount === 4) {
+            strengthBar.classList.add('good');
+            strengthText.textContent = 'Good Password';
+            strengthText.style.color = '#a78bfa';
+        } else if (metCount === 5) {
+            strengthBar.classList.add('strong');
+            strengthText.textContent = 'Strong Password!';
+            strengthText.style.color = '#10b981';
+        }
+    }
+
+    // Enable/disable submit button
+    updateSubmitButton();
+}
+
+// Update submit button state
+function updateSubmitButton() {
+    const password = document.getElementById('reg-password').value;
+    const confirmPassword = document.getElementById('reg-confirm').value;
+    const submitBtn = document.getElementById('registerSubmitBtn');
+    
+    if (!submitBtn) return;
+    
+    const allMet = Object.keys(requirements).every(req => requirements[req](password));
+    const passwordsMatch = password === confirmPassword && password.length > 0;
+
+    if (allMet && passwordsMatch) {
+        submitBtn.classList.add('enabled');
+        submitBtn.style.opacity = '1';
+        submitBtn.style.pointerEvents = 'all';
+    } else {
+        submitBtn.classList.remove('enabled');
+        submitBtn.style.opacity = '0.5';
+        submitBtn.style.pointerEvents = 'none';
+    }
+}
 
 // Switch between login and register tabs
 function switchTab(tab) {
@@ -36,10 +139,10 @@ async function handleRegister(event) {
         return;
     }
     
-    // Validate password strength
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    if (!passwordRegex.test(password)) {
-        showToast('Password must contain at least 8 characters, including uppercase, lowercase, number, and special character', 'error');
+    // Validate all password requirements are met
+    const allMet = Object.keys(requirements).every(req => requirements[req](password));
+    if (!allMet) {
+        showToast('Please meet all password requirements', 'error');
         return;
     }
     
