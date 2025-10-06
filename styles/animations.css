@@ -1,6 +1,6 @@
-/* Animation Styles */
+/* Animation Styles - Interactive Background */
 
-/* Animated Background */
+/* Animated Background with Matrix-style Code */
 .bg-animation {
     position: fixed;
     width: 100%;
@@ -9,25 +9,60 @@
     left: 0;
     z-index: -1;
     overflow: hidden;
+    background: radial-gradient(ellipse at top, #1a1a2e 0%, #0a0a1a 100%);
 }
 
+/* Matrix-style code rain effect */
+.code-line {
+    position: absolute;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    color: rgba(167, 139, 250, 0.3);
+    white-space: nowrap;
+    animation: codeRain linear infinite;
+    text-shadow: 0 0 5px rgba(167, 139, 250, 0.5);
+}
+
+/* Floating particles */
 .floating-orb {
     position: absolute;
     border-radius: 50%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1), transparent);
+    background: radial-gradient(circle, rgba(124, 58, 237, 0.15), rgba(167, 139, 250, 0.05), transparent);
+    box-shadow: 0 0 40px rgba(124, 58, 237, 0.2);
     animation: float 20s infinite ease-in-out;
+    pointer-events: none;
 }
 
 /* Keyframe Animations */
+@keyframes codeRain {
+    0% {
+        top: -100%;
+        opacity: 0;
+    }
+    10% {
+        opacity: 0.3;
+    }
+    90% {
+        opacity: 0.3;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
 @keyframes float {
     0%, 100% { 
         transform: translate(0, 0) scale(1); 
+        opacity: 0.2;
     }
     33% { 
         transform: translate(30px, -30px) scale(1.1); 
+        opacity: 0.4;
     }
     66% { 
         transform: translate(-20px, 20px) scale(0.9); 
+        opacity: 0.3;
     }
 }
 
@@ -59,5 +94,23 @@
     to {
         transform: translateX(0);
         opacity: 1;
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+@keyframes glow {
+    0%, 100% {
+        box-shadow: 0 0 20px rgba(167, 139, 250, 0.3);
+    }
+    50% {
+        box-shadow: 0 0 40px rgba(167, 139, 250, 0.6);
     }
 }
