@@ -1,6 +1,7 @@
-// Authentication Module with Password Strength Indicator
+// Authentication Module with Password Strength Indicator and Name
 
 let encryptionKey = null;
+let isShowingDashboard = false; // Flag to prevent double dashboard load
 
 // Password requirements validation
 const requirements = {
@@ -128,6 +129,7 @@ function switchTab(tab) {
 async function handleRegister(event) {
     event.preventDefault();
     
+    const name = document.getElementById('reg-name').value;
     const email = document.getElementById('reg-email').value;
     const password = document.getElementById('reg-password').value;
     const confirmPassword = document.getElementById('reg-confirm').value;
@@ -159,15 +161,13 @@ async function handleRegister(event) {
         // Set encryption key
         encryptionKey = password;
         
-        // Store user preferences (2FA setting)
-        if (enable2FA) {
-            // In production, you would set up 2FA here
-            await firebase.firestore().collection('users').doc(userCredential.user.uid).set({
-                email: email,
-                twoFactorEnabled: enable2FA,
-                createdAt: new Date()
-            });
-        }
+        // Store user data including name
+        await firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+            name: name,
+            email: email,
+            twoFactorEnabled: enable2FA,
+            createdAt: new Date()
+        });
         
         showToast('Account created successfully!', 'success');
         
@@ -245,12 +245,64 @@ async function handleLogin(event) {
     }
 }
 
+// Typewriter effect for welcome message
+function typeWriter(element, text, speed = 50) {
+    let i = 0;
+    element.textContent = '';
+    
+    function type() {
+        if (i < text.length) {
+            element.textContent += text.charAt(i);
+            i++;
+            setTimeout(type, speed);
+        }
+    }
+    
+    type();
+}
+
 // Show dashboard after successful login
-function showDashboard(user) {
+async function showDashboard(user) {
+    // Prevent double execution
+    if (isShowingDashboard) return;
+    isShowingDashboard = true;
+    
     document.getElementById('auth-container').style.display = 'none';
     document.getElementById('dashboard').classList.add('active');
     document.getElementById('nav-user').style.display = 'block';
     document.getElementById('user-email').textContent = user.email;
+    
+    // Clear and reset the dashboard title immediately
+    const dashboardTitle = document.querySelector('.dashboard-header h1');
+    dashboardTitle.textContent = ''; // Clear it first
+    
+    // Get user's name from Firestore
+    try {
+        const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
+        
+        if (userDoc.exists && userDoc.data().name) {
+            const userName = userDoc.data().name;
+            
+            // Create typewriter effect for welcome message
+            const welcomeMessages = [
+                `Welcome back, ${userName}.`,
+                `Identity verified. Welcome, ${userName}.`,
+                `You're in, ${userName}. Let's keep your world secure.`
+            ];
+            
+            // Pick a random message
+            const message = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+            
+            // Apply typewriter effect
+            typeWriter(dashboardTitle, message, 60);
+        } else {
+            // Fallback if no name found
+            typeWriter(dashboardTitle, 'Access granted. Your vault is secure.', 60);
+        }
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        typeWriter(dashboardTitle, 'Welcome to Your Secure Vault', 60);
+    }
     
     // Load user's passwords
     loadPasswords();
@@ -266,6 +318,10 @@ async function logout() {
         document.getElementById('dashboard').classList.remove('active');
         document.getElementById('nav-user').style.display = 'none';
         
+        // Reset dashboard title
+        const dashboardTitle = document.querySelector('.dashboard-header h1');
+        dashboardTitle.textContent = 'Welcome to Your Secure Vault';
+        
         showToast('Logged out successfully', 'success');
     } catch (error) {
         console.error('Logout error:', error);
@@ -276,10 +332,13 @@ async function logout() {
 // Check authentication state on page load
 firebase.auth().onAuthStateChanged((user) => {
     if (user) {
-        // User is signed in
-        showDashboard(user);
+        // User is signed in - only show dashboard if not already showing
+        if (!isShowingDashboard) {
+            showDashboard(user);
+        }
     } else {
         // User is signed out
+        isShowingDashboard = false;
         document.getElementById('auth-container').style.display = 'block';
         document.getElementById('dashboard').classList.remove('active');
     }

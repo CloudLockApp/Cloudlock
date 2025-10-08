@@ -11,7 +11,7 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles/main.css?v=3">
     <link rel="stylesheet" href="styles/animations.css?v=3">
-    <link rel="stylesheet" href="styles/components.css?v=3">
+    <link rel="stylesheet" href="styles/components.css?v=5">
 </head>
 <body>
     <!-- Animated Background -->
@@ -67,9 +67,13 @@
                 </form>
             </div>
 
-            <!-- Register Form - UPDATED WITH PASSWORD STRENGTH INDICATOR -->
+            <!-- Register Form - UPDATED WITH NAME FIELD -->
             <div id="register-form" class="auth-form" style="display: none;">
                 <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="Enter your full name">
+                    </div>
                     <div class="form-group">
                         <label for="reg-email">Email</label>
                         <input type="email" id="reg-email" required placeholder="Enter your email">
@@ -145,7 +149,7 @@
         <!-- Dashboard -->
         <div id="dashboard" class="dashboard">
             <div class="dashboard-header">
-                <h1>Welcome to Your Secure Vault</h1>
+                <h1></h1>
                 <div class="user-info">
                     <i class="fas fa-user-circle"></i>
                     <span id="user-email">user@example.com</span>
@@ -255,6 +259,122 @@
         </div>
     </div>
 
+    <!-- Advanced Password Generator Modal -->
+    <div id="password-generator-modal" class="modal">
+        <div class="modal-content generator-modal">
+            <div class="modal-header">
+                <h2><i class="fas fa-key"></i> Advanced Password Generator</h2>
+                <button class="close-btn" onclick="closeModal('password-generator-modal')">&times;</button>
+            </div>
+
+            <!-- Password Preview -->
+            <div class="generator-preview-section">
+                <div class="generator-preview" id="generator-preview">
+                    Loading...
+                </div>
+                <div class="generator-strength" id="generator-strength">
+                    <i class="fas fa-shield-alt"></i> Strong
+                </div>
+                <div class="generator-actions">
+                    <button class="btn" onclick="updateGeneratorPreview()">
+                        <i class="fas fa-sync-alt"></i> Regenerate
+                    </button>
+                    <button class="btn btn-success" onclick="copyGeneratedPassword()">
+                        <i class="fas fa-copy"></i> Copy
+                    </button>
+                    <button class="btn" onclick="useGeneratedPassword()" style="background: var(--primary);">
+                        <i class="fas fa-check"></i> Use This Password
+                    </button>
+                </div>
+            </div>
+
+            <!-- Password Type Selection -->
+            <div class="generator-types">
+                <h3>Password Type</h3>
+                <div class="type-options">
+                    <label class="type-option">
+                        <input type="radio" name="password-type" value="strong" checked onchange="updateGeneratorPreview()">
+                        <div class="option-card">
+                            <i class="fas fa-shield-alt"></i>
+                            <strong>Strong Random</strong>
+                            <span>Maximum security</span>
+                        </div>
+                    </label>
+
+                    <label class="type-option">
+                        <input type="radio" name="password-type" value="memorable" onchange="updateGeneratorPreview()">
+                        <div class="option-card">
+                            <i class="fas fa-brain"></i>
+                            <strong>Memorable</strong>
+                            <span>Easy to remember</span>
+                        </div>
+                    </label>
+
+                    <label class="type-option">
+                        <input type="radio" name="password-type" value="passphrase" onchange="updateGeneratorPreview()">
+                        <div class="option-card">
+                            <i class="fas fa-quote-left"></i>
+                            <strong>Passphrase</strong>
+                            <span>Word-based</span>
+                        </div>
+                    </label>
+
+                    <label class="type-option">
+                        <input type="radio" name="password-type" value="pin" onchange="updateGeneratorPreview()">
+                        <div class="option-card">
+                            <i class="fas fa-hashtag"></i>
+                            <strong>PIN Code</strong>
+                            <span>Numbers only</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Custom Settings -->
+            <div class="generator-settings">
+                <h3>Customize</h3>
+                
+                <div class="setting-group">
+                    <label>
+                        <span>Length: <strong id="length-value">16</strong></span>
+                        <input type="range" min="8" max="32" value="16" 
+                               oninput="document.getElementById('length-value').textContent = this.value; updateGeneratorSetting('length', parseInt(this.value))">
+                    </label>
+                </div>
+
+                <div class="setting-group checkboxes">
+                    <label>
+                        <input type="checkbox" checked onchange="updateGeneratorSetting('uppercase', this.checked)">
+                        <span>Uppercase (A-Z)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" checked onchange="updateGeneratorSetting('lowercase', this.checked)">
+                        <span>Lowercase (a-z)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" checked onchange="updateGeneratorSetting('numbers', this.checked)">
+                        <span>Numbers (0-9)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" checked onchange="updateGeneratorSetting('symbols', this.checked)">
+                        <span>Symbols (!@#$)</span>
+                    </label>
+                </div>
+
+                <div class="setting-group checkboxes">
+                    <label>
+                        <input type="checkbox" onchange="updateGeneratorSetting('excludeSimilar', this.checked)">
+                        <span>Exclude similar characters (i, l, 1, L, o, 0, O)</span>
+                    </label>
+                    <label>
+                        <input type="checkbox" onchange="updateGeneratorSetting('excludeAmbiguous', this.checked)">
+                        <span>Exclude ambiguous symbols ({ } [ ] ( ) / \ ' " ` ~)</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI Assistant Chat -->
     <div class="ai-assistant">
         <div id="ai-chat" class="ai-chat">
@@ -299,6 +419,7 @@
     <script src="js/password-manager.js"></script>
     <script src="js/ai-assistant.js"></script>
     <script src="js/security-monitor.js"></script>
+    <script src="js/advanced-generator.js"></script>
     <script src="js/app.js"></script>
     <script src="js/interactive-background.js"></script>
 </body>

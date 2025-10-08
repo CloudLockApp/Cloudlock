@@ -1,4 +1,4 @@
-// Password Manager Module - Full CRUD Operations
+// Password Manager Module - Full CRUD Operations with Security Scores
 
 let passwords = [];
 let editingPasswordId = null;
@@ -45,6 +45,33 @@ async function loadPasswords() {
     }
 }
 
+// Calculate password strength and return score info
+function getPasswordStrengthInfo(password) {
+    const strength = calculatePasswordStrength(password);
+    
+    let scoreText, scoreColor, scoreClass;
+    
+    if (strength <= 2) {
+        scoreText = 'Weak';
+        scoreColor = '#ef4444';
+        scoreClass = 'weak';
+    } else if (strength === 3) {
+        scoreText = 'Fair';
+        scoreColor = '#f59e0b';
+        scoreClass = 'fair';
+    } else if (strength === 4) {
+        scoreText = 'Good';
+        scoreColor = '#a78bfa';
+        scoreClass = 'good';
+    } else {
+        scoreText = 'Strong';
+        scoreColor = '#10b981';
+        scoreClass = 'strong';
+    }
+    
+    return { scoreText, scoreColor, scoreClass, strength };
+}
+
 // Display passwords in the UI
 function displayPasswords(passwordsToDisplay) {
     const passwordList = document.getElementById('password-list');
@@ -62,6 +89,7 @@ function displayPasswords(passwordsToDisplay) {
     passwordList.innerHTML = passwordsToDisplay.map(password => {
         const decryptedPassword = decrypt(password.password);
         const maskedPassword = '•'.repeat(12);
+        const strengthInfo = getPasswordStrengthInfo(decryptedPassword);
         
         return `
             <div class="password-item" data-id="${password.id}">
@@ -69,6 +97,9 @@ function displayPasswords(passwordsToDisplay) {
                     <div class="password-title">
                         <i class="fas fa-globe" style="margin-right: 8px; color: var(--primary-light);"></i>
                         ${password.siteName}
+                        <span class="password-strength-badge ${strengthInfo.scoreClass}" style="background: ${strengthInfo.scoreColor};">
+                            ${strengthInfo.scoreText}
+                        </span>
                     </div>
                     <div class="password-username">${password.username}</div>
                     ${password.url ? `<div style="font-size: 0.8rem; opacity: 0.6; margin-top: 5px;">${password.url}</div>` : ''}
@@ -246,34 +277,9 @@ function copyPassword(passwordId) {
     });
 }
 
-// Generate secure password (enhanced version)
+// Generate secure password - Opens advanced generator
 function generateSecurePassword() {
-    const length = 16;
-    const uppercase = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-    const lowercase = "abcdefghijklmnopqrstuvwxyz";
-    const numbers = "0123456789";
-    const special = "!@#$%^&*()_+-=[]{}|;:,.<>?";
-    
-    // Ensure at least one character from each category
-    let password = "";
-    password += uppercase.charAt(Math.floor(Math.random() * uppercase.length));
-    password += lowercase.charAt(Math.floor(Math.random() * lowercase.length));
-    password += numbers.charAt(Math.floor(Math.random() * numbers.length));
-    password += special.charAt(Math.floor(Math.random() * special.length));
-    
-    // Fill the rest randomly
-    const allChars = uppercase + lowercase + numbers + special;
-    for (let i = password.length; i < length; i++) {
-        password += allChars.charAt(Math.floor(Math.random() * allChars.length));
-    }
-    
-    // Shuffle the password
-    password = password.split('').sort(() => Math.random() - 0.5).join('');
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(password).then(() => {
-        showToast(`🔑 Generated: ${password.substring(0, 8)}... (copied!)`, 'success');
-    });
+    openPasswordGeneratorModal();
 }
 
 // Open add password modal
