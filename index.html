@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cloudlock - Zero-Trust Password Manager</title>
+    <title>CloudLock - Zero-Trust Password Manager</title>
     
     <!-- External Dependencies -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,7 @@
     <!-- Custom Styles -->
     <link rel="stylesheet" href="styles/main.css?v=3">
     <link rel="stylesheet" href="styles/animations.css?v=3">
-    <link rel="stylesheet" href="styles/components.css?v=5">
+    <link rel="stylesheet" href="styles/landing.css?v=1">
 </head>
 <body>
     <!-- Animated Background -->
@@ -26,401 +26,169 @@
         <div class="nav-container">
             <div class="logo">
                 <i class="fas fa-shield-alt"></i>
-                <span>Cloudlock</span>
+                <span>CloudLock</span>
             </div>
-            <div id="nav-user" style="display: none;">
-                <button class="btn btn-danger" onclick="logout()">
-                    <i class="fas fa-sign-out-alt"></i>
-                    Logout
-                </button>
+            <div class="nav-links">
+                <a href="#features" onclick="scrollToSection(event, 'features')">Features</a>
+                <a href="#security" onclick="scrollToSection(event, 'security')">Security</a>
+                <a href="login.html" class="nav-cta">Sign In</a>
             </div>
         </div>
     </nav>
 
     <div class="container">
-        <!-- Authentication Container -->
-        <div id="auth-container" class="auth-container">
-            <div class="auth-tabs">
-                <button class="tab-btn active" onclick="switchTab('login')">Login</button>
-                <button class="tab-btn" onclick="switchTab('register')">Register</button>
-            </div>
-
-            <!-- Login Form -->
-            <div id="login-form" class="auth-form">
-                <form onsubmit="handleLogin(event)">
-                    <div class="form-group">
-                        <label for="login-email">Email</label>
-                        <input type="email" id="login-email" required placeholder="Enter your email">
-                    </div>
-                    <div class="form-group">
-                        <label for="login-password">Password</label>
-                        <input type="password" id="login-password" required placeholder="Enter your password">
-                    </div>
-                    <div class="form-group">
-                        <label for="login-2fa">2FA Code (if enabled)</label>
-                        <input type="text" id="login-2fa" placeholder="Enter 6-digit code">
-                    </div>
-                    <button type="submit" class="btn btn-full">
-                        <i class="fas fa-lock"></i>
-                        Secure Login
-                    </button>
-                </form>
-            </div>
-
-            <!-- Register Form - UPDATED WITH NAME FIELD -->
-            <div id="register-form" class="auth-form" style="display: none;">
-                <form onsubmit="handleRegister(event)">
-                    <div class="form-group">
-                        <label for="reg-name">Full Name</label>
-                        <input type="text" id="reg-name" required placeholder="Enter your full name">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-email">Email</label>
-                        <input type="email" id="reg-email" required placeholder="Enter your email">
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-password">Master Password</label>
-                        <input type="password" id="reg-password" required placeholder="Create a strong password">
-                        
-                        <!-- Strength Bar -->
-                        <div class="strength-bar-container">
-                            <div class="strength-bar" id="strengthBar"></div>
-                        </div>
-                        <div class="strength-text" id="strengthText"></div>
-
-                        <!-- Password Requirements -->
-                        <div class="password-requirements">
-                            <div class="requirements-title">Password Requirements</div>
-                            
-                            <div class="requirement-item" data-requirement="length">
-                                <div class="requirement-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="requirement-text">At least 8 characters</div>
-                            </div>
-
-                            <div class="requirement-item" data-requirement="uppercase">
-                                <div class="requirement-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="requirement-text">One uppercase letter (A-Z)</div>
-                            </div>
-
-                            <div class="requirement-item" data-requirement="lowercase">
-                                <div class="requirement-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="requirement-text">One lowercase letter (a-z)</div>
-                            </div>
-
-                            <div class="requirement-item" data-requirement="number">
-                                <div class="requirement-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="requirement-text">One number (0-9)</div>
-                            </div>
-
-                            <div class="requirement-item" data-requirement="special">
-                                <div class="requirement-icon">
-                                    <i class="fas fa-check"></i>
-                                </div>
-                                <div class="requirement-text">One special character (!@#$%^&*)</div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="reg-confirm">Confirm Password</label>
-                        <input type="password" id="reg-confirm" required placeholder="Confirm your password">
-                    </div>
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="enable-2fa" style="width: auto; margin-right: 10px;">
-                            Enable Two-Factor Authentication
-                        </label>
-                    </div>
-                    <button type="submit" class="btn btn-full" id="registerSubmitBtn">
-                        <i class="fas fa-user-plus"></i>
-                        Create Secure Account
-                    </button>
-                </form>
-            </div>
-        </div>
-
-        <!-- Dashboard -->
-        <div id="dashboard" class="dashboard">
-            <div class="dashboard-header">
-                <h1></h1>
-                <div class="user-info">
-                    <i class="fas fa-user-circle"></i>
-                    <span id="user-email">user@example.com</span>
-                </div>
-            </div>
-
-            <!-- Security Status Cards -->
-            <div class="security-status">
-                <div class="status-card">
-                    <h3><i class="fas fa-shield-alt"></i> Zero-Trust Status</h3>
-                    <div class="status-indicator status-active">
-                        <i class="fas fa-check-circle"></i> Active Protection
-                    </div>
-                    <p style="margin-top: 10px; opacity: 0.8;">All systems verified</p>
-                </div>
-
-                <div class="status-card">
-                    <h3><i class="fas fa-lock"></i> Encryption</h3>
-                    <div class="status-indicator status-active">
-                        <i class="fas fa-check-circle"></i> AES-256 + RSA-4096
-                    </div>
-                    <p style="margin-top: 10px; opacity: 0.8;">Military-grade encryption active</p>
-                </div>
-
-                <div class="status-card">
-                    <h3><i class="fas fa-cloud"></i> Multi-Cloud Backup</h3>
-                    <div class="status-indicator status-active">
-                        <i class="fas fa-check-circle"></i> 3 Clouds Synced
-                    </div>
-                    <p style="margin-top: 10px; opacity: 0.8;">AWS, Google Cloud, Azure</p>
-                </div>
-
-                <div class="status-card">
-                    <h3><i class="fas fa-globe"></i> Dark Web Monitor</h3>
-                    <div id="dark-web-status" class="status-indicator status-active">
-                        <i class="fas fa-check-circle"></i> No Breaches Detected
-                    </div>
-                    <p style="margin-top: 10px; opacity: 0.8;">Last scan: Just now</p>
-                </div>
-            </div>
-
-            <!-- Password Vault -->
-            <div class="vault-controls">
-                <div class="search-box">
-                    <input type="text" id="search-passwords" placeholder="Search passwords..." onkeyup="searchPasswords()">
-                </div>
-                <button class="btn" onclick="openAddPasswordModal()">
-                    <i class="fas fa-plus"></i>
-                    Add Password
-                </button>
-                <button class="btn btn-success" onclick="generateSecurePassword()">
-                    <i class="fas fa-key"></i>
-                    Generate Password
-                </button>
-            </div>
-
-            <div id="password-list" class="password-grid">
-                <!-- Passwords will be loaded here -->
-            </div>
-
-            <!-- Self Destruct Panel -->
-            <div class="self-destruct-panel">
-                <h3><i class="fas fa-bomb"></i> Emergency Self-Destruct</h3>
-                <p>In case of emergency, instantly wipe all credentials across all devices and cloud storage.</p>
-                <button class="btn btn-danger" onclick="confirmSelfDestruct()">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    Activate Self-Destruct
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add/Edit Password Modal -->
-    <div id="password-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modal-title">Add New Password</h2>
-                <button class="close-btn" onclick="closeModal('password-modal')">&times;</button>
-            </div>
-            <form onsubmit="savePassword(event)">
-                <div class="form-group">
-                    <label for="site-name">Website/Service Name</label>
-                    <input type="text" id="site-name" required placeholder="e.g., Google, Facebook">
-                </div>
-                <div class="form-group">
-                    <label for="site-url">URL</label>
-                    <input type="url" id="site-url" placeholder="https://example.com">
-                </div>
-                <div class="form-group">
-                    <label for="site-username">Username/Email</label>
-                    <input type="text" id="site-username" required placeholder="Your username or email">
-                </div>
-                <div class="form-group">
-                    <label for="site-password">Password</label>
-                    <input type="password" id="site-password" required placeholder="Enter password">
-                </div>
-                <div class="form-group">
-                    <label for="site-notes">Notes (Optional)</label>
-                    <textarea id="site-notes" rows="3" placeholder="Additional secure notes"></textarea>
-                </div>
-                <input type="hidden" id="password-id">
-                <button type="submit" class="btn btn-full">
-                    <i class="fas fa-save"></i>
-                    Save Encrypted
-                </button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Advanced Password Generator Modal -->
-    <div id="password-generator-modal" class="modal">
-        <div class="modal-content generator-modal">
-            <div class="modal-header">
-                <h2><i class="fas fa-key"></i> Advanced Password Generator</h2>
-                <button class="close-btn" onclick="closeModal('password-generator-modal')">&times;</button>
-            </div>
-
-            <!-- Password Preview -->
-            <div class="generator-preview-section">
-                <div class="generator-preview" id="generator-preview">
-                    Loading...
-                </div>
-                <div class="generator-strength" id="generator-strength">
-                    <i class="fas fa-shield-alt"></i> Strong
-                </div>
-                <div class="generator-actions">
-                    <button class="btn" onclick="updateGeneratorPreview()">
-                        <i class="fas fa-sync-alt"></i> Regenerate
-                    </button>
-                    <button class="btn btn-success" onclick="copyGeneratedPassword()">
-                        <i class="fas fa-copy"></i> Copy
-                    </button>
-                    <button class="btn" onclick="useGeneratedPassword()" style="background: var(--primary);">
-                        <i class="fas fa-check"></i> Use This Password
-                    </button>
-                </div>
-            </div>
-
-            <!-- Password Type Selection -->
-            <div class="generator-types">
-                <h3>Password Type</h3>
-                <div class="type-options">
-                    <label class="type-option">
-                        <input type="radio" name="password-type" value="strong" checked onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-shield-alt"></i>
-                            <strong>Strong Random</strong>
-                            <span>Maximum security</span>
-                        </div>
-                    </label>
-
-                    <label class="type-option">
-                        <input type="radio" name="password-type" value="memorable" onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-brain"></i>
-                            <strong>Memorable</strong>
-                            <span>Easy to remember</span>
-                        </div>
-                    </label>
-
-                    <label class="type-option">
-                        <input type="radio" name="password-type" value="passphrase" onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-quote-left"></i>
-                            <strong>Passphrase</strong>
-                            <span>Word-based</span>
-                        </div>
-                    </label>
-
-                    <label class="type-option">
-                        <input type="radio" name="password-type" value="pin" onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-hashtag"></i>
-                            <strong>PIN Code</strong>
-                            <span>Numbers only</span>
-                        </div>
-                    </label>
-                </div>
-            </div>
-
-            <!-- Custom Settings -->
-            <div class="generator-settings">
-                <h3>Customize</h3>
+        <!-- Hero Section -->
+        <section class="hero-section">
+            <div class="hero-content">
+                <h1>Your Digital Identity,<br><span class="gradient-text">Secured with AI</span></h1>
+                <p class="subtitle">
+                    Military-grade encryption meets intelligent security. CloudLock protects your passwords with zero-trust architecture and AI-powered threat detection.
+                </p>
                 
-                <div class="setting-group">
-                    <label>
-                        <span>Length: <strong id="length-value">16</strong></span>
-                        <input type="range" min="8" max="32" value="16" 
-                               oninput="document.getElementById('length-value').textContent = this.value; updateGeneratorSetting('length', parseInt(this.value))">
-                    </label>
+                <div class="cta-buttons">
+                    <a href="login.html" class="btn btn-primary">
+                        <i class="fas fa-rocket"></i>
+                        Get Started Free
+                    </a>
+                    <button class="btn btn-secondary" onclick="scrollToSection(event, 'features')">
+                        <i class="fas fa-info-circle"></i>
+                        Learn More
+                    </button>
+                    <button class="btn btn-outline" onclick="scrollToSection(event, 'security')">
+                        <i class="fas fa-shield-alt"></i>
+                        Security Details
+                    </button>
                 </div>
 
-                <div class="setting-group checkboxes">
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('uppercase', this.checked)">
-                        <span>Uppercase (A-Z)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('lowercase', this.checked)">
-                        <span>Lowercase (a-z)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('numbers', this.checked)">
-                        <span>Numbers (0-9)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('symbols', this.checked)">
-                        <span>Symbols (!@#$)</span>
-                    </label>
+                <div class="feature-badges">
+                    <div class="badge">
+                        <i class="fas fa-check-circle"></i>
+                        AES-256 Encryption
+                    </div>
+                    <div class="badge">
+                        <i class="fas fa-check-circle"></i>
+                        Zero-Knowledge
+                    </div>
+                    <div class="badge">
+                        <i class="fas fa-check-circle"></i>
+                        AI Assistant
+                    </div>
+                    <div class="badge">
+                        <i class="fas fa-check-circle"></i>
+                        Multi-Cloud Backup
+                    </div>
                 </div>
 
-                <div class="setting-group checkboxes">
-                    <label>
-                        <input type="checkbox" onchange="updateGeneratorSetting('excludeSimilar', this.checked)">
-                        <span>Exclude similar characters (i, l, 1, L, o, 0, O)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" onchange="updateGeneratorSetting('excludeAmbiguous', this.checked)">
-                        <span>Exclude ambiguous symbols ({ } [ ] ( ) / \ ' " ` ~)</span>
-                    </label>
+                <div class="stats-section">
+                    <div class="stat-card">
+                        <div class="stat-number">256&#8209;bit</div>
+                        <div class="stat-label">Military Encryption</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">99.9%</div>
+                        <div class="stat-label">Uptime SLA</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">Zero</div>
+                        <div class="stat-label">Knowledge Policy</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-number">🕵️ 24/7</div>
+                        <div class="stat-label">Dark Web Monitor</div>
+                    </div>
                 </div>
             </div>
-        </div>
+        </section>
+
+        <!-- Features Section -->
+        <section id="features" class="info-section">
+            <h2 class="section-title">Why Choose CloudLock?</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-shield-alt"></i>
+                    <h3>Military-Grade Security</h3>
+                    <p>AES-256 encryption with RSA-4096 key exchange. Your data is protected by the same technology used by governments and militaries worldwide.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-brain"></i>
+                    <h3>AI Security Assistant</h3>
+                    <p>Our AI assistant analyzes password strength, detects potential threats, and provides personalized security recommendations 24/7.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-cloud"></i>
+                    <h3>Multi-Cloud Backup</h3>
+                    <p>Your encrypted vault syncs across AWS, Google Cloud, and Azure. Always accessible, always secure, never lost.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-user-secret"></i>
+                    <h3>Zero-Knowledge Architecture</h3>
+                    <p>We can't access your passwords even if we wanted to. Only you hold the encryption key to your vault.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Security Section -->
+        <section id="security" class="info-section">
+            <h2 class="section-title">Enterprise-Grade Security</h2>
+            <div class="info-grid">
+                <div class="info-card">
+                    <i class="fas fa-lock"></i>
+                    <h3>End-to-End Encryption</h3>
+                    <p>All data is encrypted on your device before it ever reaches our servers. We use AES-256-GCM with client-side key derivation.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-key"></i>
+                    <h3>PBKDF2 Key Derivation</h3>
+                    <p>Your master password is never stored. We use 100,000+ iterations of PBKDF2-HMAC-SHA256 to derive encryption keys.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-fingerprint"></i>
+                    <h3>Biometric Authentication</h3>
+                    <p>Support for Touch ID, Face ID, and Windows Hello for quick and secure access to your vault.</p>
+                </div>
+                <div class="info-card">
+                    <i class="fas fa-radar"></i>
+                    <h3>Dark Web Monitoring</h3>
+                    <p>24/7 monitoring of breached credentials databases to alert you if your information appears in any data breach.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Final CTA Section -->
+        <section class="info-section" style="text-align: center; padding: 60px 20px;">
+            <h2 class="section-title">Ready to Secure Your Digital Life?</h2>
+            <p style="font-size: 1.2rem; color: rgba(255, 255, 255, 0.7); margin-bottom: 40px; max-width: 600px; margin-left: auto; margin-right: auto;">
+                Join thousands of users who trust CloudLock to protect their most sensitive information.
+            </p>
+            <a href="login.html" class="btn btn-primary" style="font-size: 1.2rem; padding: 20px 50px;">
+                <i class="fas fa-rocket"></i>
+                Start Free Today
+            </a>
+        </section>
     </div>
 
-    <!-- AI Assistant Chat -->
-    <div class="ai-assistant">
-        <div id="ai-chat" class="ai-chat">
-            <div class="ai-chat-header">
-                <h3><i class="fas fa-robot"></i> AI Security Assistant</h3>
-            </div>
-            <div id="ai-messages" class="ai-chat-messages">
-                <div class="ai-message bot">
-                    Hello! I'm your AI security assistant. I can help you:
-                    <br>• Generate secure passwords
-                    <br>• Check for security threats
-                    <br>• Analyze password strength
-                    <br>• Provide security tips
-                </div>
-            </div>
-            <div class="ai-chat-input">
-                <input type="text" id="ai-input" placeholder="Ask me anything..." onkeypress="handleAIChat(event)">
-                <button class="btn" onclick="sendAIMessage()">
-                    <i class="fas fa-paper-plane"></i>
-                </button>
-            </div>
+    <!-- Footer -->
+    <footer style="background: rgba(10, 10, 26, 0.95); padding: 40px 20px; text-align: center; border-top: 1px solid rgba(124, 58, 237, 0.2); margin-top: 60px;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="color: rgba(255, 255, 255, 0.6); margin-bottom: 10px;">
+                © 2025 CloudLock. Built with security in mind.
+            </p>
+            <p style="color: rgba(255, 255, 255, 0.4); font-size: 0.9rem;">
+                CSUF CPSC 362 Software Engineering Project
+            </p>
         </div>
-        <button class="ai-toggle" onclick="toggleAIChat()">
-            <i class="fas fa-robot"></i>
-        </button>
-    </div>
+    </footer>
 
-    <!-- Firebase Libraries - MUST LOAD FIRST -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-    
-    <!-- CryptoJS for Encryption -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-
-    <!-- Application Scripts - ORDER MATTERS! -->
-    <script src="js/config.js"></script>
-    <script src="js/firebase-init.js"></script>
-    <script src="js/ui-utils.js"></script>
-    <script src="js/encryption.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/password-manager.js"></script>
-    <script src="js/ai-assistant.js"></script>
-    <script src="js/security-monitor.js"></script>
-    <script src="js/advanced-generator.js"></script>
-    <script src="js/app.js"></script>
     <script src="js/interactive-background.js"></script>
+    <script>
+        // Smooth scroll function
+        function scrollToSection(event, sectionId) {
+            event.preventDefault();
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+    </script>
 </body>
 </html>

@@ -268,6 +268,16 @@ async function showDashboard(user) {
     isShowingDashboard = true;
     
     document.getElementById('auth-container').style.display = 'none';
+    
+    // Hide hero and info sections when logged in
+    const heroSection = document.getElementById('hero-section');
+    const infoSection = document.getElementById('features');
+    const navLinks = document.getElementById('nav-links');
+    
+    if (heroSection) heroSection.style.display = 'none';
+    if (infoSection) infoSection.style.display = 'none';
+    if (navLinks) navLinks.style.display = 'none';
+    
     document.getElementById('dashboard').classList.add('active');
     document.getElementById('nav-user').style.display = 'block';
     document.getElementById('user-email').textContent = user.email;
@@ -313,8 +323,20 @@ async function logout() {
     try {
         await firebase.auth().signOut();
         encryptionKey = null;
+        isShowingDashboard = false;
         
-        document.getElementById('auth-container').style.display = 'block';
+        // Hide auth container initially - user must click to show it
+        document.getElementById('auth-container').style.display = 'none';
+        
+        // Show hero and info sections when logged out
+        const heroSection = document.getElementById('hero-section');
+        const infoSection = document.getElementById('features');
+        const navLinks = document.getElementById('nav-links');
+        
+        if (heroSection) heroSection.style.display = 'block';
+        if (infoSection) infoSection.style.display = 'block';
+        if (navLinks) navLinks.style.display = 'flex';
+        
         document.getElementById('dashboard').classList.remove('active');
         document.getElementById('nav-user').style.display = 'none';
         
@@ -339,7 +361,19 @@ firebase.auth().onAuthStateChanged((user) => {
     } else {
         // User is signed out
         isShowingDashboard = false;
-        document.getElementById('auth-container').style.display = 'block';
+        
+        // IMPORTANT: Keep auth container hidden on landing page
+        // It will be shown when user clicks "Sign In" button
+        document.getElementById('auth-container').style.display = 'none';
         document.getElementById('dashboard').classList.remove('active');
+        
+        // Make sure landing sections are visible
+        const heroSection = document.getElementById('hero-section');
+        const infoSection = document.getElementById('features');
+        const navLinks = document.getElementById('nav-links');
+        
+        if (heroSection) heroSection.style.display = 'block';
+        if (infoSection) infoSection.style.display = 'block';
+        if (navLinks) navLinks.style.display = 'flex';
     }
 });

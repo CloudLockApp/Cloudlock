@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - CloudLock Password Manager</title>
+    
+    <!-- External Dependencies -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom Styles -->
+    <link rel="stylesheet" href="styles/main.css?v=3">
+    <link rel="stylesheet" href="styles/animations.css?v=3">
+    <link rel="stylesheet" href="styles/components.css?v=5">
+    <link rel="stylesheet" href="styles/landing.css?v=1">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="bg-animation">
+        <div class="floating-orb" style="width: 200px; height: 200px; top: 10%; left: 10%;"></div>
+        <div class="floating-orb" style="width: 150px; height: 150px; top: 70%; left: 80%; animation-delay: -7s;"></div>
+        <div class="floating-orb" style="width: 100px; height: 100px; top: 40%; left: 50%; animation-delay: -14s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>CloudLock</span>
+            </div>
+            <div class="nav-links">
+                <a href="index.html">Home</a>
+                <a href="index.html#features">Features</a>
+                <a href="index.html#security">Security</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <!-- Authentication Container -->
+        <div id="auth-container" class="auth-container" style="margin-top: 100px;">
+            <div class="auth-tabs">
+                <button class="tab-btn active" onclick="switchTab('login')">Login</button>
+                <button class="tab-btn" onclick="switchTab('register')">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <div id="login-form" class="auth-form">
+                <form onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="login-email">Email</label>
+                        <input type="email" id="login-email" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-password">Password</label>
+                        <input type="password" id="login-password" required placeholder="Enter your password">
+                    </div>
+                    <div class="form-group">
+                        <label for="login-2fa">2FA Code (if enabled)</label>
+                        <input type="text" id="login-2fa" placeholder="Enter 6-digit code">
+                    </div>
+                    <button type="submit" class="btn btn-full">
+                        <i class="fas fa-lock"></i>
+                        Secure Login
+                    </button>
+                    <div class="auth-footer">
+                        Forgot password? <a href="#reset">Reset here</a>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Register Form -->
+            <div id="register-form" class="auth-form" style="display: none;">
+                <form onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label for="reg-name">Full Name</label>
+                        <input type="text" id="reg-name" required placeholder="Enter your full name">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-email">Email</label>
+                        <input type="email" id="reg-email" required placeholder="Enter your email">
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-password">Master Password</label>
+                        <input type="password" id="reg-password" required placeholder="Create a strong password">
+                        
+                        <!-- Strength Bar -->
+                        <div class="strength-bar-container">
+                            <div class="strength-bar" id="strengthBar"></div>
+                        </div>
+                        <div class="strength-text" id="strengthText"></div>
+
+                        <!-- Password Requirements -->
+                        <div class="password-requirements">
+                            <div class="requirements-title">Password Requirements</div>
+                            
+                            <div class="requirement-item" data-requirement="length">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="requirement-text">At least 8 characters</div>
+                            </div>
+
+                            <div class="requirement-item" data-requirement="uppercase">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="requirement-text">One uppercase letter (A-Z)</div>
+                            </div>
+
+                            <div class="requirement-item" data-requirement="lowercase">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="requirement-text">One lowercase letter (a-z)</div>
+                            </div>
+
+                            <div class="requirement-item" data-requirement="number">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="requirement-text">One number (0-9)</div>
+                            </div>
+
+                            <div class="requirement-item" data-requirement="special">
+                                <div class="requirement-icon">
+                                    <i class="fas fa-check"></i>
+                                </div>
+                                <div class="requirement-text">One special character (!@#$%^&*)</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="reg-confirm">Confirm Password</label>
+                        <input type="password" id="reg-confirm" required placeholder="Confirm your password">
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="enable-2fa" style="width: auto; margin-right: 10px;">
+                            Enable Two-Factor Authentication
+                        </label>
+                    </div>
+                    <button type="submit" class="btn btn-full" id="registerSubmitBtn">
+                        <i class="fas fa-user-plus"></i>
+                        Create Secure Account
+                    </button>
+                    <div class="auth-footer">
+                        Already have an account? <a href="#" onclick="switchTab('login'); return false;">Login here</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Libraries -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    
+    <!-- CryptoJS for Encryption -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="js/config.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/ui-utils.js"></script>
+    <script src="js/encryption.js"></script>
+    <script src="js/interactive-background.js"></script>
+    
+    <!-- Login-specific auth script -->
+    <script>
+        let encryptionKey = null;
+
+        // Password requirements validation
+        const requirements = {
+            length: password => password.length >= 8,
+            uppercase: password => /[A-Z]/.test(password),
+            lowercase: password => /[a-z]/.test(password),
+            number: password => /[0-9]/.test(password),
+            special: password => /[!@#$%^&*(),.?":{}|<>]/.test(password)
+        };
+
+        // Initialize password strength checker
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordInput = document.getElementById('reg-password');
+            const confirmPasswordInput = document.getElementById('reg-confirm');
+            
+            if (passwordInput) {
+                passwordInput.addEventListener('input', updatePasswordStrength);
+            }
+            
+            if (confirmPasswordInput) {
+                confirmPasswordInput.addEventListener('input', updateSubmitButton);
+            }
+
+            // Check if already logged in
+            firebase.auth().onAuthStateChanged((user) => {
+                if (user) {
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+                }
+            });
+        });
+
+        // Update password strength indicator
+        function updatePasswordStrength() {
+            const password = document.getElementById('reg-password').value;
+            const strengthBar = document.getElementById('strengthBar');
+            const strengthText = document.getElementById('strengthText');
+            let metCount = 0;
+
+            Object.keys(requirements).forEach(req => {
+                const requirementItem = document.querySelector(`[data-requirement="${req}"]`);
+                if (!requirementItem) return;
+                
+                const isMet = requirements[req](password);
+
+                if (isMet) {
+                    requirementItem.classList.add('met');
+                    metCount++;
+                } else {
+                    requirementItem.classList.remove('met');
+                }
+
+                if (password.length > 0) {
+                    requirementItem.classList.add('active');
+                } else {
+                    requirementItem.classList.remove('active');
+                }
+            });
+
+            if (strengthBar && strengthText) {
+                strengthBar.className = 'strength-bar';
+                if (metCount === 0) {
+                    strengthBar.style.width = '0%';
+                    strengthText.textContent = '';
+                } else if (metCount <= 2) {
+                    strengthBar.classList.add('weak');
+                    strengthText.textContent = 'Weak Password';
+                    strengthText.style.color = '#ef4444';
+                } else if (metCount === 3) {
+                    strengthBar.classList.add('fair');
+                    strengthText.textContent = 'Fair Password';
+                    strengthText.style.color = '#f59e0b';
+                } else if (metCount === 4) {
+                    strengthBar.classList.add('good');
+                    strengthText.textContent = 'Good Password';
+                    strengthText.style.color = '#a78bfa';
+                } else if (metCount === 5) {
+                    strengthBar.classList.add('strong');
+                    strengthText.textContent = 'Strong Password!';
+                    strengthText.style.color = '#10b981';
+                }
+            }
+
+            updateSubmitButton();
+        }
+
+        function updateSubmitButton() {
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm').value;
+            const submitBtn = document.getElementById('registerSubmitBtn');
+            
+            if (!submitBtn) return;
+            
+            const allMet = Object.keys(requirements).every(req => requirements[req](password));
+            const passwordsMatch = password === confirmPassword && password.length > 0;
+
+            if (allMet && passwordsMatch) {
+                submitBtn.classList.add('enabled');
+                submitBtn.style.opacity = '1';
+                submitBtn.style.pointerEvents = 'all';
+            } else {
+                submitBtn.classList.remove('enabled');
+                submitBtn.style.opacity = '0.5';
+                submitBtn.style.pointerEvents = 'none';
+            }
+        }
+
+        function switchTab(tab) {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabs = document.querySelectorAll('.tab-btn');
+            
+            tabs.forEach(btn => btn.classList.remove('active'));
+            
+            if (tab === 'login') {
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+                tabs[0].classList.add('active');
+            } else {
+                loginForm.style.display = 'none';
+                registerForm.style.display = 'block';
+                tabs[1].classList.add('active');
+            }
+        }
+
+        async function handleRegister(event) {
+            event.preventDefault();
+            
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirmPassword = document.getElementById('reg-confirm').value;
+            const enable2FA = document.getElementById('enable-2fa').checked;
+            
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
+            
+            const allMet = Object.keys(requirements).every(req => requirements[req](password));
+            if (!allMet) {
+                showToast('Please meet all password requirements', 'error');
+                return;
+            }
+            
+            try {
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating Account...';
+                submitBtn.disabled = true;
+                
+                const userCredential = await firebase.auth().createUserWithEmailAndPassword(email, password);
+                
+                encryptionKey = password;
+                
+                await firebase.firestore().collection('users').doc(userCredential.user.uid).set({
+                    name: name,
+                    email: email,
+                    twoFactorEnabled: enable2FA,
+                    createdAt: new Date()
+                });
+                
+                showToast('Account created successfully!', 'success');
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                let errorMessage = 'Registration failed. Please try again.';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'This email is already registered. Please login instead.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email address.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password is too weak.';
+                }
+                
+                showToast(errorMessage, 'error');
+                
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-user-plus"></i> Create Secure Account';
+                submitBtn.disabled = false;
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                submitBtn.disabled = true;
+                
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+                
+                encryptionKey = password;
+                
+                showToast('Login successful!', 'success');
+                
+                // Redirect to dashboard
+                setTimeout(() => {
+                    window.location.href = 'dashboard.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Login failed. Please check your credentials.';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'No account found with this email.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Incorrect password.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Invalid email address.';
+                }
+                
+                showToast(errorMessage, 'error');
+                
+                const submitBtn = event.target.querySelector('button[type="submit"]');
+                submitBtn.innerHTML = '<i class="fas fa-lock"></i> Secure Login';
+                submitBtn.disabled = false;
+            }
+        }
+    </script>
+</body>
+</html>
