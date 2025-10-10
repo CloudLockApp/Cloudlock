@@ -1,5 +1,5 @@
 // Configuration File
-// Firebase and OpenAI credentials
+// Firebase and Gemini credentials
 
 const CONFIG = {
     // Firebase Configuration - UPDATED WITH NEW CREDENTIALS
@@ -12,10 +12,8 @@ const CONFIG = {
         appId: "1:723019842397:web:886db24af7ed5587351eb4"
     },
     
-    // OpenAI Configuration
-    // Get your API key from https://platform.openai.com/api-keys
-    openai: {
-        apiKey: 'YOUR_OPENAI_API_KEY'  // Replace with your OpenAI API key (starts with sk-proj- or sk-)
+    gemini: {
+        apiKey: 'AIzaSyDIXgGuWs6vB-zw7BCGlLn3pNcEZie3-MQ'
     }
 };
 

@@ -34,29 +34,25 @@ async function sendAIMessage() {
     `;
     
     try {
-        // Call OpenAI API
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${CONFIG.openai.apiKey}`
-            },
-            body: JSON.stringify({
-                model: 'gpt-3.5-turbo',
-                messages: [
-                    {
-                        role: 'system',
-                        content: 'You are a helpful AI security assistant for a password manager. Provide advice on password security, help generate strong passwords, and answer security-related questions.'
-                    },
-                    {
-                        role: 'user',
-                        content: message
-                    }
-                ],
-                temperature: 0.7,
-                max_tokens: 200
-            })
-        });
+        const response = await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.gemini.apiKey}`,
+                {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                                contents: [
+                                        {
+                                                role: 'user',
+                                                parts: [
+                                                        { text: `You are an AI model designed to detect threats to the password management system. User: ${message}` }
+                                                ]
+                                        }
+                                ]
+                        })
+                }
+        );
+
+
         
         // Remove typing indicator
         const typingMsg = messagesContainer.querySelector('.typing');
@@ -64,7 +60,10 @@ async function sendAIMessage() {
         
         if (response.ok) {
             const data = await response.json();
-            const aiResponse = data.choices[0].message.content;
+            const aiResponse =
+                data?.candidates?.[0]?.content?.parts?.[0]?.text ||
+                "There are no responses received.";
+
             
             messagesContainer.innerHTML += `
                 <div class="ai-message bot">${aiResponse}</div>
@@ -80,7 +79,7 @@ async function sendAIMessage() {
         if (typingMsg) typingMsg.remove();
         
         messagesContainer.innerHTML += `
-            <div class="ai-message bot">I can help you with password security tips! Try asking me about generating strong passwords, security best practices, or password analysis.</div>
+            <div class="ai-message bot">Connection error: ${error.message}</div>
         `;
     }
     
