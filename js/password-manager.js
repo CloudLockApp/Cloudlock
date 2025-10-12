@@ -32,6 +32,12 @@ async function loadPasswords() {
         // Display passwords
         displayPasswords(passwords);
 
+        // Generate AI alerts onto database 
+        if (typeof unsecureDetector === 'function') {
+            unsecureDetector(passwords);
+      }
+
+
         console.log(`📂 Loaded ${passwords.length} passwords`);
     } catch (error) {
         console.error('Error loading passwords:', error);

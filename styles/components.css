@@ -1,5 +1,21 @@
 /* Component Styles */
 
+
+.ai-insights {
+    background: rgba(215, 30, 30, 0.06);
+    margin-bottom: 30px;
+    border-radius: 20px;
+    padding: 25px;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+.ai-insights .alert {
+    background: rgba(280, 0, 0, 0.1);
+    border-left: 4px solid #c01c1c;
+    padding: 10px 25px;
+    margin-top: 10px;
+    border-radius: 10px;
+}
+
 /* Auth Container */
 .auth-container {
     max-width: 400px;

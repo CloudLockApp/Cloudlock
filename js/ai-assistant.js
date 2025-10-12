@@ -12,6 +12,7 @@ function handleAIChat(event) {
     }
 }
 
+
 // Send message to AI
 async function sendAIMessage() {
     const input = document.getElementById('ai-input');
@@ -85,3 +86,66 @@ async function sendAIMessage() {
     
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
 }
+
+
+// Gemini Insight Summarizer
+async function generateAIInsight(aiSummary) {
+    try {
+        const response = await fetch(
+            `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${CONFIG.gemini.apiKey}`,
+            {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [
+                        {
+                            parts: [
+                                {
+                                    text: `You are an AI model designed to detect threats to the password management system.${aiSummary} Please don't make it too long but not too short either. A paragraph with 10 sentences is good. Be specific about the situation.`
+                                }
+                            ]
+                        }
+                    ]
+                }),
+            }
+        );
+
+        const data = await response.json();
+        return data?.candidates?.[0]?.content?.parts?.[0]?.text || "We have no insights right now.";
+    } catch (error) {
+        console.error("Gemini Insight Error Detected:", error);
+        return "⚠️ We cannot generate the Gemini AI Insight at the moment.";
+    }
+}
+
+async function unsecureDetector(passwords) {
+    const insightsContainer = document.getElementById('insight-messages');
+    insightsContainer.innerHTML = `<p>Analyzing password health...</p>`;
+
+    if (!passwords || passwords.length === 0) {
+        insightsContainer.innerHTML = `<p>No passwords have been stored yet.</p>`;
+        return;
+    }
+
+    // Password match check
+    const decryptedPassword = passwords.map(p => decrypt(p.password));
+    const passwordCounts = {};
+    decryptedPassword.forEach(p => passwordCounts[p] = (passwordCounts[p] || 0) + 1);
+
+    const duplicatePassword = Object.entries(passwordCounts).filter(([_, c]) => c > 1).length;
+    const total = passwords.length;
+
+    // Sending to Gemini API
+    const summary = `The user has ${total} passwords stored. ${duplicatePassword} of them are reused across multiple accounts.`;
+
+
+    const aiMessage = await generateAIInsight(summary);
+
+    // Display it
+    insightsContainer.innerHTML = `
+        <div class="alert">
+            <strong>💡 AI Insight:</strong><br>${aiMessage}
+        </div>
+    `;
+}
+
