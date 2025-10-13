@@ -15,6 +15,17 @@
     margin-top: 10px;
     border-radius: 10px;
 }
+.ai-insight-wrapper:hover .ai-pass-insight {
+    display: block;
+}
+
+.ai-pass-insight {
+    position: absolute;   
+    z-index: 500;       
+    pointer-events: none;
+}
+
+
 
 /* Auth Container */
 .auth-container {

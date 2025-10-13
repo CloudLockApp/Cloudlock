@@ -139,13 +139,43 @@ async function unsecureDetector(passwords) {
     const summary = `The user has ${total} passwords stored. ${duplicatePassword} of them are reused across multiple accounts.`;
 
 
-    const aiMessage = await generateAIInsight(summary);
+    insightsContainer.innerHTML = '';
 
-    // Display it
-    insightsContainer.innerHTML = `
-        <div class="alert">
-            <strong>💡 AI Insight:</strong><br>${aiMessage}
-        </div>
-    `;
+    for (const p of passwords) {
+        const decrypted = decrypt(p.password);
+        const length = decrypted.length;
+        const upperCount = /[A-Z]/.test(decrypted);
+        const lowerCount = /[a-z]/.test(decrypted);
+        const numCount = /[0-9]/.test(decrypted);
+        const symbolCount = /[^A-Za-z0-9]/.test(decrypted);
+        const reusedCount = passwordCounts[decrypted]; 
+        const lastUpdated = p.updatedAt ? new Date(p.updatedAt.seconds * 1000) : null;
+        const daysOld = lastUpdated ? Math.floor((Date.now() - lastUpdated) / (1000 * 60 * 60 * 24)) : "unknown";
+
+
+        const summary = `
+            For site ${p.siteName}, the password has length ${length}.
+            It ${upperCount ? "includes" : "does not include"} uppercase letters,
+            ${lowerCount ? "includes" : "does not include"} lowercase letters,
+            ${numCount ? "includes" : "does not include"} numbers,
+            and ${symbolCount ? "includes" : "does not include"} symbols.
+            It is used on ${reusedCount} accounts and was last updated ${daysOld} days ago.
+            Provide a small paragraph that analyzes the security situation. Provide tips. Ten sentences max.
+        `;
+    
+        const insight = await generateAIInsight(summary);
+    
+        const aiElement = document.getElementById(`ai-insight-${p.id}`);
+        if (aiElement) {
+            aiElement.innerHTML = `
+                <div class="alert" style="background: rgba(255,255,255,0.05); border-left: 3px solid #0af; padding: 8px; border-radius: 6px;">
+                    <strong>🔍 AI Insight:</strong> ${insight}
+                </div>
+            `;
+        }
+
+    }
 }
+
+
 

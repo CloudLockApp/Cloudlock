@@ -110,6 +110,16 @@ function displayPasswords(passwordsToDisplay) {
                     <div class="password-username">${password.username}</div>
                     ${password.url ? `<div style="font-size: 0.8rem; opacity: 0.6; margin-top: 5px;">${password.url}</div>` : ''}
                 </div>
+                <div class="ai-insight-wrapper" style="margin-top: 10px; position: relative; overflow: visible;">
+                    <button class="ai-insight-btn" 
+                        style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.9rem; margin-left: 15px; margin-right: 15px; margin-bottom: 10px;">
+                        💡 AI Insight
+                    </button>
+                    <div id="ai-insight-${password.id}" 
+                        class="ai-pass-insight" 
+                        style="display: none; position: absolute; top: 120%; left: 0; background: #222; color: #fff; padding: 10px; border-radius: 6px; width: 250px; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 1000;">
+                    </div>
+                </div>
                 <div class="password-actions">
                     <button class="icon-btn" onclick="togglePasswordVisibility('${password.id}')" title="Show/Hide Password">
                         <i class="fas fa-eye" id="eye-${password.id}"></i>
@@ -130,6 +140,25 @@ function displayPasswords(passwordsToDisplay) {
             </div>
         `;
     }).join('');
+
+    document.querySelectorAll('.ai-insight-btn').forEach(button => {
+        const insightDiv = button.nextElementSibling; 
+
+        document.body.appendChild(insightDiv);
+
+        button.addEventListener('mouseenter', (e) => {
+            const rect = button.getBoundingClientRect();
+
+            insightDiv.style.top = `${rect.top + window.scrollY - insightDiv.offsetHeight - 5}px`; 
+            insightDiv.style.left = `${rect.left + window.scrollX}px`;
+            insightDiv.style.display = 'block';
+            insightDiv.style.zIndex = '500';
+        });
+    
+        button.addEventListener('mouseleave', () => {
+            insightDiv.style.display = 'none';
+        });
+    });
 }
 
 // Search passwords
