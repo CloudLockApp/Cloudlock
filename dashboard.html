@@ -12,7 +12,22 @@
     <link rel="stylesheet" href="styles/main.css?v=3">
     <link rel="stylesheet" href="styles/animations.css?v=3">
     <link rel="stylesheet" href="styles/components.css?v=5">
-    <link rel="stylesheet" href="styles/nav-ticker.css">
+    <link rel="stylesheet" href="styles/security-insights.css">
+
+    <!-- Typing Cursor Animation -->
+    <style>
+        .dashboard-header h1::after {
+            content: "|";
+            animation: blink 1s infinite;
+            opacity: 1;
+            margin-left: 4px;
+        }
+
+        @keyframes blink {
+            0%, 50%, 100% { opacity: 1; }
+            25%, 75% { opacity: 0; }
+        }
+    </style>
 </head>
 <body>
     <!-- Animated Background -->
@@ -84,7 +99,6 @@
                 </div>
             </div>
 
-
             <!-- Password Vault -->
             <div class="vault-controls">
                 <div class="search-box">
@@ -100,9 +114,7 @@
                 </button>
             </div>
 
-            <div id="password-list" class="password-grid">
-                <!-- Passwords will be loaded here -->
-            </div>
+            <div id="password-list" class="password-grid"></div>
             <div id="insight-messages" style="margin-top: 20px;"></div>
 
             <!-- Self Destruct Panel -->
@@ -162,11 +174,8 @@
                 <button class="close-btn" onclick="closeModal('password-generator-modal')">&times;</button>
             </div>
 
-            <!-- Password Preview -->
             <div class="generator-preview-section">
-                <div class="generator-preview" id="generator-preview">
-                    Loading...
-                </div>
+                <div class="generator-preview" id="generator-preview">Loading...</div>
                 <div class="generator-strength" id="generator-strength">
                     <i class="fas fa-shield-alt"></i> Strong
                 </div>
@@ -189,38 +198,19 @@
                 <div class="type-options">
                     <label class="type-option">
                         <input type="radio" name="password-type" value="strong" checked onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-shield-alt"></i>
-                            <strong>Strong Random</strong>
-                            <span>Maximum security</span>
-                        </div>
+                        <div class="option-card"><i class="fas fa-shield-alt"></i><strong>Strong Random</strong><span>Maximum security</span></div>
                     </label>
-
                     <label class="type-option">
                         <input type="radio" name="password-type" value="memorable" onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-brain"></i>
-                            <strong>Memorable</strong>
-                            <span>Easy to remember</span>
-                        </div>
+                        <div class="option-card"><i class="fas fa-brain"></i><strong>Memorable</strong><span>Easy to remember</span></div>
                     </label>
-
                     <label class="type-option">
                         <input type="radio" name="password-type" value="passphrase" onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-quote-left"></i>
-                            <strong>Passphrase</strong>
-                            <span>Word-based</span>
-                        </div>
+                        <div class="option-card"><i class="fas fa-quote-left"></i><strong>Passphrase</strong><span>Word-based</span></div>
                     </label>
-
                     <label class="type-option">
                         <input type="radio" name="password-type" value="pin" onchange="updateGeneratorPreview()">
-                        <div class="option-card">
-                            <i class="fas fa-hashtag"></i>
-                            <strong>PIN Code</strong>
-                            <span>Numbers only</span>
-                        </div>
+                        <div class="option-card"><i class="fas fa-hashtag"></i><strong>PIN Code</strong><span>Numbers only</span></div>
                     </label>
                 </div>
             </div>
@@ -228,7 +218,6 @@
             <!-- Custom Settings -->
             <div class="generator-settings">
                 <h3>Customize</h3>
-                
                 <div class="setting-group">
                     <label>
                         <span>Length: <strong id="length-value">16</strong></span>
@@ -238,33 +227,15 @@
                 </div>
 
                 <div class="setting-group checkboxes">
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('uppercase', this.checked)">
-                        <span>Uppercase (A-Z)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('lowercase', this.checked)">
-                        <span>Lowercase (a-z)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('numbers', this.checked)">
-                        <span>Numbers (0-9)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" checked onchange="updateGeneratorSetting('symbols', this.checked)">
-                        <span>Symbols (!@#$)</span>
-                    </label>
+                    <label><input type="checkbox" checked onchange="updateGeneratorSetting('uppercase', this.checked)"> <span>Uppercase (A-Z)</span></label>
+                    <label><input type="checkbox" checked onchange="updateGeneratorSetting('lowercase', this.checked)"> <span>Lowercase (a-z)</span></label>
+                    <label><input type="checkbox" checked onchange="updateGeneratorSetting('numbers', this.checked)"> <span>Numbers (0-9)</span></label>
+                    <label><input type="checkbox" checked onchange="updateGeneratorSetting('symbols', this.checked)"> <span>Symbols (!@#$)</span></label>
                 </div>
 
                 <div class="setting-group checkboxes">
-                    <label>
-                        <input type="checkbox" onchange="updateGeneratorSetting('excludeSimilar', this.checked)">
-                        <span>Exclude similar characters (i, l, 1, L, o, 0, O)</span>
-                    </label>
-                    <label>
-                        <input type="checkbox" onchange="updateGeneratorSetting('excludeAmbiguous', this.checked)">
-                        <span>Exclude ambiguous symbols ({ } [ ] ( ) / \ ' " ` ~)</span>
-                    </label>
+                    <label><input type="checkbox" onchange="updateGeneratorSetting('excludeSimilar', this.checked)"> <span>Exclude similar characters (i, l, 1, L, o, 0, O)</span></label>
+                    <label><input type="checkbox" onchange="updateGeneratorSetting('excludeAmbiguous', this.checked)"> <span>Exclude ambiguous symbols ({ } [ ] ( ) / \ ' " ` ~)</span></label>
                 </div>
             </div>
         </div>
@@ -314,45 +285,62 @@
     <script src="js/ai-assistant.js"></script>
     <script src="js/security-monitor.js"></script>
     <script src="js/advanced-generator.js"></script>
+    <script src="js/security-insights.js"></script>
     <script src="js/interactive-background.js"></script>
-    <script src="js/js/nav-ticker.js"></script>
 
     <script>
         let encryptionKey = null;
         let currentUser = null;
 
-        // Check if user is logged in
         document.addEventListener('DOMContentLoaded', function() {
             firebase.auth().onAuthStateChanged(async (user) => {
                 if (user) {
                     currentUser = user;
                     document.getElementById('user-email').textContent = user.email;
-                    
-                    // Get user's name and show welcome message
+
+                    const dashboardTitle = document.querySelector('.dashboard-header h1');
+                    dashboardTitle.textContent = '';
+
+                    // Typewriter effect
+                    function typeWriter(element, text, speed = 60) {
+                        let i = 0;
+                        element.textContent = '';
+                        function typing() {
+                            if (i < text.length) {
+                                element.textContent += text.charAt(i);
+                                i++;
+                                setTimeout(typing, speed);
+                            }
+                        }
+                        typing();
+                    }
+
                     try {
                         const userDoc = await firebase.firestore().collection('users').doc(user.uid).get();
-                        const dashboardTitle = document.querySelector('.dashboard-header h1');
-                        
                         if (userDoc.exists && userDoc.data().name) {
                             const userName = userDoc.data().name;
-                            dashboardTitle.textContent = `Welcome back, ${userName}.`;
+                            const welcomeMessages = [
+                                `Welcome back, ${userName}.`,
+                                `Identity verified. Welcome, ${userName}.`,
+                                `You're in, ${userName}. Let's keep your world secure.`
+                            ];
+                            const message = welcomeMessages[Math.floor(Math.random() * welcomeMessages.length)];
+                            typeWriter(dashboardTitle, message, 60);
                         } else {
-                            dashboardTitle.textContent = 'Welcome to Your Secure Vault';
+                            typeWriter(dashboardTitle, 'Access granted. Your vault is secure.', 60);
                         }
                     } catch (error) {
                         console.error('Error fetching user data:', error);
+                        typeWriter(dashboardTitle, 'Welcome to Your Secure Vault.', 60);
                     }
-                    
-                    // Load passwords
+
                     loadPasswords();
                 } else {
-                    // Not logged in, redirect to login
                     window.location.href = 'login.html';
                 }
             });
         });
 
-        // Logout function
         async function logout() {
             try {
                 await firebase.auth().signOut();

@@ -1,0 +1,295 @@
+/* Security Insights - Ultra Minimal with Sparkly Lightbulb */
+
+/* Modal insight card - "Did you know?" style */
+.security-insight {
+    margin-top: 12px;
+    background: rgba(124, 58, 237, 0.08);
+    border: 1px solid rgba(167, 139, 250, 0.2);
+    border-radius: 8px;
+    overflow: visible; /* CHANGED: allow sparkles to show */
+    opacity: 0;
+    transform: translateY(-5px);
+    transition: all 0.3s ease;
+}
+
+.security-insight.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.insight-content {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    position: relative;
+    overflow: visible; /* ADDED */
+}
+
+.insight-icon {
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    position: relative;
+    animation: lightbulbGlow 2s ease-in-out infinite;
+}
+
+@keyframes lightbulbGlow {
+    0%, 100% { 
+        opacity: 1;
+        filter: brightness(1) drop-shadow(0 0 3px rgba(251, 191, 36, 0.4));
+    }
+    50% { 
+        opacity: 0.8;
+        filter: brightness(1.4) drop-shadow(0 0 10px rgba(251, 191, 36, 0.8));
+    }
+}
+
+/* Sparkles around lightbulb */
+.insight-icon::before {
+    content: '✨';
+    position: absolute;
+    font-size: 0.8rem;
+    top: -10px;
+    left: -10px;
+    opacity: 0;
+    animation: sparkle1 2.5s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.insight-icon::after {
+    content: '✨';
+    position: absolute;
+    font-size: 0.8rem;
+    bottom: -10px;
+    right: -10px;
+    opacity: 0;
+    animation: sparkle2 2.5s ease-in-out infinite;
+    animation-delay: 0.6s;
+    pointer-events: none;
+}
+
+@keyframes sparkle1 {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    15% {
+        opacity: 1;
+        transform: scale(1.2) rotate(180deg);
+    }
+    30% {
+        opacity: 0;
+        transform: scale(0.5) rotate(360deg);
+    }
+}
+
+@keyframes sparkle2 {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0) rotate(0deg);
+    }
+    15% {
+        opacity: 1;
+        transform: scale(1) rotate(-180deg);
+    }
+    30% {
+        opacity: 0;
+        transform: scale(0.5) rotate(-360deg);
+    }
+}
+
+/* Additional sparkles */
+.insight-content::before {
+    content: '✨';
+    position: absolute;
+    left: 32px;
+    top: 2px;
+    font-size: 0.6rem;
+    opacity: 0;
+    animation: sparkle3 2.5s ease-in-out infinite;
+    animation-delay: 1.2s;
+    pointer-events: none;
+}
+
+.insight-content::after {
+    content: '✨';
+    position: absolute;
+    left: 35px;
+    bottom: 5px;
+    font-size: 0.6rem;
+    opacity: 0;
+    animation: sparkle3 2.5s ease-in-out infinite;
+    animation-delay: 1.8s;
+    pointer-events: none;
+}
+
+@keyframes sparkle3 {
+    0%, 100% {
+        opacity: 0;
+        transform: scale(0) translateY(0);
+    }
+    20% {
+        opacity: 1;
+        transform: scale(1.3) translateY(-3px);
+    }
+    40% {
+        opacity: 0;
+        transform: scale(0.3) translateY(-8px);
+    }
+}
+
+.insight-text {
+    flex: 1;
+    min-width: 0;
+}
+
+.insight-title {
+    font-weight: 600;
+    font-size: 0.75rem;
+    color: #a78bfa;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.insight-message {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+
+.insight-dismiss {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    font-size: 0.9rem;
+    padding: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.insight-dismiss:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.insight-actions {
+    padding: 0 12px 10px 12px;
+    display: flex;
+    gap: 6px;
+}
+
+.btn-insight {
+    flex: 1;
+    padding: 6px 12px;
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(167, 139, 250, 0.3);
+    color: #a78bfa;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+}
+
+.btn-insight:hover {
+    background: rgba(124, 58, 237, 0.25);
+    border-color: rgba(167, 139, 250, 0.5);
+    transform: translateY(-1px);
+}
+
+.btn-insight-secondary {
+    padding: 6px 12px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: rgba(255, 255, 255, 0.5);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-insight-secondary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.8);
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Dashboard inline insights - DISABLED */
+.dashboard-insight {
+    display: none;
+}
+
+.insight-warning-icon {
+    display: none;
+}
+
+/* Issues list modal */
+.issues-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 20px 0;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.issue-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 10px;
+    background: rgba(15, 15, 35, 0.4);
+    border-radius: 6px;
+    border: 1px solid rgba(124, 58, 237, 0.15);
+    transition: all 0.2s;
+}
+
+.issue-item:hover {
+    background: rgba(15, 15, 35, 0.6);
+    border-color: rgba(167, 139, 250, 0.3);
+}
+
+.issue-severity {
+    padding: 2px 6px;
+    border-radius: 6px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    flex-shrink: 0;
+}
+
+.issue-message {
+    flex: 1;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 0.85rem;
+    line-height: 1.4;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .insight-actions {
+        flex-direction: column;
+    }
+    
+    .btn-insight,
+    .btn-insight-secondary {
+        width: 100%;
+    }
+}

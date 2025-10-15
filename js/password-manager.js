@@ -35,8 +35,7 @@ async function loadPasswords() {
         // Generate AI alerts onto database 
         if (typeof unsecureDetector === 'function') {
             unsecureDetector(passwords);
-      }
-
+        }
 
         console.log(`📂 Loaded ${passwords.length} passwords`);
     } catch (error) {
@@ -97,12 +96,18 @@ function displayPasswords(passwordsToDisplay) {
         const maskedPassword = '•'.repeat(12);
         const strengthInfo = getPasswordStrengthInfo(decryptedPassword);
         
+        // Get security insight for this password
+        const insight = typeof showDashboardInsight === 'function' 
+            ? showDashboardInsight(password.id, decryptedPassword, password.siteName)
+            : '';
+        
         return `
             <div class="password-item" data-id="${password.id}">
                 <div class="password-info">
                     <div class="password-title">
                         <i class="fas fa-globe" style="margin-right: 8px; color: var(--primary-light);"></i>
                         ${password.siteName}
+                        ${insight}
                         <span class="password-strength-badge ${strengthInfo.scoreClass}" style="background: ${strengthInfo.scoreColor};">
                             ${strengthInfo.scoreText}
                         </span>
