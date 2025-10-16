@@ -1,7 +1,9 @@
 // Password Manager Module - Full CRUD Operations with Security Scores
 
+
 let passwords = [];
 let editingPasswordId = null;
+
 
 // Load all passwords for current user
 async function loadPasswords() {
@@ -10,12 +12,15 @@ async function loadPasswords() {
         return;
     }
 
+
     const userId = firebase.auth().currentUser.uid;
     const passwordList = document.getElementById('password-list');
+
 
     try {
         // Show loading state
         passwordList.innerHTML = '<div class="spinner"></div>';
+
 
         // Fetch passwords from Firestore
         const snapshot = await firebase.firestore()
@@ -24,18 +29,22 @@ async function loadPasswords() {
             .orderBy('createdAt', 'desc')
             .get();
 
+
         passwords = [];
         snapshot.forEach(doc => {
             passwords.push({ id: doc.id, ...doc.data() });
         });
 
+
         // Display passwords
         displayPasswords(passwords);
 
-        // Generate AI alerts onto database 
+
+        // Generate AI alerts onto database
         if (typeof unsecureDetector === 'function') {
             unsecureDetector(passwords);
         }
+
 
         console.log(`📂 Loaded ${passwords.length} passwords`);
     } catch (error) {
@@ -50,12 +59,13 @@ async function loadPasswords() {
     }
 }
 
+
 // Calculate password strength and return score info
 function getPasswordStrengthInfo(password) {
     const strength = calculatePasswordStrength(password);
-    
+   
     let scoreText, scoreColor, scoreClass;
-    
+   
     if (strength <= 2) {
         scoreText = 'Weak';
         scoreColor = '#ef4444';
@@ -73,13 +83,15 @@ function getPasswordStrengthInfo(password) {
         scoreColor = '#10b981';
         scoreClass = 'strong';
     }
-    
+   
     return { scoreText, scoreColor, scoreClass, strength };
 }
+
 
 // Display passwords in the UI
 function displayPasswords(passwordsToDisplay) {
     const passwordList = document.getElementById('password-list');
+
 
     if (passwordsToDisplay.length === 0) {
         passwordList.innerHTML = `
@@ -91,16 +103,17 @@ function displayPasswords(passwordsToDisplay) {
         return;
     }
 
+
     passwordList.innerHTML = passwordsToDisplay.map(password => {
         const decryptedPassword = decrypt(password.password);
         const maskedPassword = '•'.repeat(12);
         const strengthInfo = getPasswordStrengthInfo(decryptedPassword);
-        
+       
         // Get security insight for this password
-        const insight = typeof showDashboardInsight === 'function' 
+        const insight = typeof showDashboardInsight === 'function'
             ? showDashboardInsight(password.id, decryptedPassword, password.siteName)
             : '';
-        
+       
         return `
             <div class="password-item" data-id="${password.id}">
                 <div class="password-info">
@@ -116,12 +129,12 @@ function displayPasswords(passwordsToDisplay) {
                     ${password.url ? `<div style="font-size: 0.8rem; opacity: 0.6; margin-top: 5px;">${password.url}</div>` : ''}
                 </div>
                 <div class="ai-insight-wrapper" style="margin-top: 10px; position: relative; overflow: visible;">
-                    <button class="ai-insight-btn" 
+                    <button class="ai-insight-btn"
                         style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.9rem; margin-left: 15px; margin-right: 15px; margin-bottom: 10px;">
                         💡 AI Insight
                     </button>
-                    <div id="ai-insight-${password.id}" 
-                        class="ai-pass-insight" 
+                    <div id="ai-insight-${password.id}"
+                        class="ai-pass-insight"
                         style="display: none; position: absolute; top: 120%; left: 0; background: #222; color: #fff; padding: 10px; border-radius: 6px; width: 250px; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 1000;">
                     </div>
                 </div>
@@ -146,52 +159,54 @@ function displayPasswords(passwordsToDisplay) {
         `;
     }).join('');
 
+
     document.querySelectorAll('.ai-insight-btn').forEach(button => {
-        const insightDiv = button.nextElementSibling; 
+        const insightDiv = button.nextElementSibling;
 
-        document.body.appendChild(insightDiv);
 
-        button.addEventListener('mouseenter', (e) => {
-            const rect = button.getBoundingClientRect();
-
-            insightDiv.style.top = `${rect.top + window.scrollY - insightDiv.offsetHeight - 5}px`; 
-            insightDiv.style.left = `${rect.left + window.scrollX}px`;
+        button.addEventListener('mouseenter', () => {
             insightDiv.style.display = 'block';
-            insightDiv.style.zIndex = '500';
         });
-    
+
+
         button.addEventListener('mouseleave', () => {
             insightDiv.style.display = 'none';
         });
     });
 }
 
+
 // Search passwords
 function searchPasswords() {
     const searchTerm = document.getElementById('search-passwords').value.toLowerCase();
-    
+   
     if (!searchTerm) {
         displayPasswords(passwords);
         return;
     }
 
-    const filtered = passwords.filter(password => 
+
+    const filtered = passwords.filter(password =>
         password.siteName.toLowerCase().includes(searchTerm) ||
         password.username.toLowerCase().includes(searchTerm) ||
         (password.url && password.url.toLowerCase().includes(searchTerm))
     );
 
+
     displayPasswords(filtered);
 }
+
 
 // Save password (Create or Update)
 async function savePassword(event) {
     event.preventDefault();
 
+
     if (!firebase.auth().currentUser) {
         showToast('Please login first', 'error');
         return;
     }
+
 
     const userId = firebase.auth().currentUser.uid;
     const siteName = document.getElementById('site-name').value;
@@ -201,8 +216,10 @@ async function savePassword(event) {
     const notes = document.getElementById('site-notes').value;
     const passwordId = document.getElementById('password-id').value;
 
+
     // Encrypt the password
     const encryptedPassword = encrypt(password);
+
 
     const passwordData = {
         userId: userId,
@@ -214,6 +231,7 @@ async function savePassword(event) {
         updatedAt: new Date()
     };
 
+
     try {
         if (passwordId) {
             // Update existing password
@@ -221,7 +239,7 @@ async function savePassword(event) {
                 .collection('passwords')
                 .doc(passwordId)
                 .update(passwordData);
-            
+           
             showToast('Password updated successfully!', 'success');
         } else {
             // Create new password
@@ -229,9 +247,10 @@ async function savePassword(event) {
             await firebase.firestore()
                 .collection('passwords')
                 .add(passwordData);
-            
+           
             showToast('Password saved successfully!', 'success');
         }
+
 
         closeModal('password-modal');
         loadPasswords();
@@ -241,10 +260,12 @@ async function savePassword(event) {
     }
 }
 
+
 // Edit password
 function editPassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
+
 
     // Populate modal with password data
     document.getElementById('modal-title').textContent = 'Edit Password';
@@ -255,22 +276,27 @@ function editPassword(passwordId) {
     document.getElementById('site-password').value = decrypt(password.password);
     document.getElementById('site-notes').value = decrypt(password.notes) || '';
 
+
     openModal('password-modal');
 }
+
 
 // Delete password
 async function deletePassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
 
+
     const confirmed = confirm(`Are you sure you want to delete the password for ${password.siteName}?`);
     if (!confirmed) return;
+
 
     try {
         await firebase.firestore()
             .collection('passwords')
             .doc(passwordId)
             .delete();
+
 
         showToast('Password deleted successfully', 'success');
         loadPasswords();
@@ -280,13 +306,16 @@ async function deletePassword(passwordId) {
     }
 }
 
+
 // Toggle password visibility
 function togglePasswordVisibility(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
 
+
     const passwordDisplay = document.getElementById(`pass-${passwordId}`);
     const eyeIcon = document.getElementById(`eye-${passwordId}`);
+
 
     if (passwordDisplay.style.display === 'none') {
         // Show password
@@ -303,13 +332,15 @@ function togglePasswordVisibility(passwordId) {
     }
 }
 
+
 // Copy password to clipboard
 function copyPassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
 
+
     const decryptedPassword = decrypt(password.password);
-    
+   
     navigator.clipboard.writeText(decryptedPassword).then(() => {
         showToast('Password copied to clipboard!', 'success');
     }).catch(err => {
@@ -317,10 +348,12 @@ function copyPassword(passwordId) {
     });
 }
 
+
 // Generate secure password - Opens advanced generator
 function generateSecurePassword() {
     openPasswordGeneratorModal();
 }
+
 
 // Open add password modal
 function openAddPasswordModal() {
