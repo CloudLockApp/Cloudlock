@@ -92,26 +92,56 @@ async function analyzePasswordSecurity() {
     }
 }
 
-// Calculate password strength (1-5 scale)
+// Calculate password strength score (1-100)
 function calculatePasswordStrength(password) {
     let strength = 0;
 
     // Length check
-    if (password.length >= 8) strength++;
-    if (password.length >= 12) strength++;
+    if (password.length <= 4) {
+        strength += 5;
+    }
+    else if (password.length <= 7){
+        strength += 10;
+    }
+    else if (password.length <= 10){
+        strength += 20;
+    }
+    else if (password.length <= 15) {
+        strength += 30;
+    }
+    else {
+        strength += 40;
+    }
 
     // Character variety checks
-    if (/[a-z]/.test(password)) strength++;
-    if (/[A-Z]/.test(password)) strength++;
-    if (/[0-9]/.test(password)) strength++;
-    if (/[^a-zA-Z0-9]/.test(password)) strength++;
+    if (/[a-z]/.test(password)){
+         strength += 5;
+    }
+    if (/[A-Z]/.test(password)) {
+        strength += 10;
+    }
+    if (/[0-9]/.test(password)) {
+        strength += 10;
+    }
+    
+    const symbolCount = (password.match(/[^A-Za-z0-9]/g) || []).length;
+    if (symbolCount > 0){
+        strength += 20 + (symbolCount - 1) * 10;
+    }
 
-    // Reduce strength for common patterns
-    if (/(.)\1{2,}/.test(password)) strength--; // Repeated characters
-    if (/^[0-9]+$/.test(password)) strength -= 2; // Only numbers
-    if (/^[a-zA-Z]+$/.test(password)) strength--; // Only letters
+    // Deduct for repeated characters
+    for (let i = 1; i < password.length; i++) {
+        if (password[i] === password[i - 1]) {
+            strength -= 5;
+        }
+    }
+    if (/^[0-9]+$/.test(password)) strength -= 30; // Only numbers
+    if (/^[a-zA-Z]+$/.test(password)) strength -= 30; // Only letters
 
-    return Math.max(1, Math.min(5, strength));
+    if (strength > 100) strength = 100;
+    if (strength < 0) strength = 0;
+
+    return strength;
 }
 
 // Self-destruct functionality

@@ -60,21 +60,22 @@ async function loadPasswords() {
 }
 
 
+
 // Calculate password strength and return score info
 function getPasswordStrengthInfo(password) {
     const strength = calculatePasswordStrength(password);
    
     let scoreText, scoreColor, scoreClass;
    
-    if (strength <= 2) {
+    if (strength <= 40) {
         scoreText = 'Weak';
         scoreColor = '#ef4444';
         scoreClass = 'weak';
-    } else if (strength === 3) {
+    } else if (strength <= 60) {
         scoreText = 'Fair';
         scoreColor = '#f59e0b';
         scoreClass = 'fair';
-    } else if (strength === 4) {
+    } else if (strength <= 80) {
         scoreText = 'Good';
         scoreColor = '#a78bfa';
         scoreClass = 'good';
@@ -108,7 +109,7 @@ function displayPasswords(passwordsToDisplay) {
         const decryptedPassword = decrypt(password.password);
         const maskedPassword = '•'.repeat(12);
         const strengthInfo = getPasswordStrengthInfo(decryptedPassword);
-       
+
         // Get security insight for this password
         const insight = typeof showDashboardInsight === 'function'
             ? showDashboardInsight(password.id, decryptedPassword, password.siteName)
@@ -123,6 +124,7 @@ function displayPasswords(passwordsToDisplay) {
                         ${insight}
                         <span class="password-strength-badge ${strengthInfo.scoreClass}" style="background: ${strengthInfo.scoreColor};">
                             ${strengthInfo.scoreText}
+                            (Score: ${strengthInfo.strength})
                         </span>
                     </div>
                     <div class="password-username">${password.username}</div>
