@@ -18,7 +18,7 @@
 
 CloudLock is a modern, AI-powered password manager built with security and usability in mind. Featuring end-to-end encryption, real-time password strength validation, dark web monitoring, and an AI security assistant, CloudLock helps you manage your digital credentials safely and efficiently.
 
-Built as a CPSC 362 Software Engineering project at California State University, Fullerton.
+Built as a CPSC 491 Senior Capstone project at California State University, Fullerton.
 
 <div align="center">
 
@@ -269,12 +269,12 @@ cloudlock/
 | Name | Role | GitHub | Contributions |
 |------|------|--------|---------------|
 | **Ryan Trinh** | Lead Developer | [@spill](https://github.com/spill) | Core architecture, Firebase integration, UI/UX |
-| **Brian Wei** | Developer | [@bw4127](https://github.com/bw4127) | Feature development, testing |
+| **Brian Wei** | Developer | [@brianwei23](https://github.com/brianwei23) | Feature development, testing, AI integration |
 | **Christian Ward** | Developer | [@christian](https://github.com/christian) | Documentation, security features |
 
-**Course:** CPSC 362 - Software Engineering  
+**Course:** CPSC 491 - Senior Capstone Project in Computer Science
 **Institution:** California State University, Fullerton  
-**Semester:** Spring 2025
+**Semester:** Fall 2025
 
 </div>
 
@@ -282,7 +282,7 @@ cloudlock/
 
 ## 🤝 Contributing
 
-This is a student project for CPSC 362. While we're not accepting external contributions, feel free to:
+This is a student project for CPSC 491. While we're not accepting external contributions, feel free to:
 
 - ⭐ Star the repository
 - 🐛 Report bugs via Issues
@@ -299,7 +299,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- **Professor:** [Professor Name] - CPSC 362 instructor
+- **Professor:** Rong Jin - CPSC 491 instructor
 - **Inspiration:** 1Password, LastPass, Bitwarden
 - **Technologies:** Firebase, Google Gemini AI, Font Awesome
 - **Community:** Stack Overflow, GitHub, MDN Web Docs
@@ -318,7 +318,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ### 🔒 Built with Security in Mind
 
-**CloudLock** © 2025 - CSUF CPSC 362 Project
+**CloudLock** © 2025 - CSUF CPSC 491 Project
 
 *"Your passwords, secured. Your privacy, protected."*
 
