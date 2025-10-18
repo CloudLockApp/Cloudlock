@@ -272,7 +272,7 @@ cloudlock/
 | **Brian Wei** | Developer | [@brianwei23](https://github.com/brianwei23) | Feature development, testing, AI integration |
 | **Christian Ward** | Developer | [@christian](https://github.com/christian) | Documentation, security features |
 
-**Course:** CPSC 491 - Senior Capstone Project in Computer Science
+**Course:** CPSC 491 - Senior Capstone Project in Computer Science  
 **Institution:** California State University, Fullerton  
 **Semester:** Fall 2025
 
