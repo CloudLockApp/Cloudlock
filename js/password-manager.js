@@ -130,7 +130,7 @@ function displayPasswords(passwordsToDisplay) {
                 </div>
                 <div class="ai-insight-wrapper" style="margin-top: 10px; position: relative; overflow: visible;">
                     <button class="ai-insight-btn"
-                        style="background: #007bff; color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.9rem; margin-left: 15px; margin-right: 15px; margin-bottom: 10px;">
+                        style="background: rgba(215, 30, 30, 0.06); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.9rem; margin-left: 15px; margin-right: 15px; margin-bottom: 10px;">
                         💡 AI Insight
                     </button>
                     <div id="ai-insight-${password.id}"
