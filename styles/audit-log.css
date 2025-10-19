@@ -1,0 +1,382 @@
+/* Audit Log Styles - Clean & Modern Timeline */
+
+.audit-modal-content {
+    max-width: 800px;
+    width: 95%;
+}
+
+.audit-header {
+    padding: 20px;
+    background: rgba(124, 58, 237, 0.1);
+    border-radius: 12px;
+    margin-bottom: 30px;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.audit-header h3 {
+    color: #fff;
+    margin: 0;
+    font-size: 1.3rem;
+}
+
+/* Timeline Container */
+.audit-timeline {
+    position: relative;
+    padding-left: 40px;
+}
+
+/* Timeline vertical line */
+.audit-timeline::before {
+    content: '';
+    position: absolute;
+    left: 9px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: linear-gradient(
+        180deg, 
+        rgba(124, 58, 237, 0.6) 0%, 
+        rgba(124, 58, 237, 0.2) 100%
+    );
+}
+
+/* Individual Event */
+.audit-event {
+    position: relative;
+    margin-bottom: 25px;
+}
+
+.audit-event:last-child {
+    margin-bottom: 0;
+}
+
+/* Timeline Dot */
+.audit-timeline-dot {
+    position: absolute;
+    left: -40px;
+    top: 8px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #7c3aed;
+    border: 3px solid rgba(15, 15, 35, 0.8);
+    box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.2),
+                0 0 20px rgba(124, 58, 237, 0.4);
+    z-index: 2;
+}
+
+/* Event Card */
+.audit-event-card {
+    background: rgba(15, 15, 35, 0.6);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    transition: all 0.3s;
+}
+
+.audit-event-card:hover {
+    background: rgba(15, 15, 35, 0.8);
+    border-color: rgba(124, 58, 237, 0.4);
+    transform: translateX(5px);
+    box-shadow: 0 5px 20px rgba(124, 58, 237, 0.2);
+}
+
+/* Event Header */
+.audit-event-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.audit-event-action {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    color: #fff;
+}
+
+.audit-event-action i {
+    color: #a78bfa;
+    font-size: 1.1rem;
+}
+
+.audit-event-time {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.85rem;
+}
+
+/* Event Details Grid */
+.audit-event-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.audit-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.audit-detail-label {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-weight: 600;
+}
+
+.audit-detail-value {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.9rem;
+}
+
+/* Password Hash Display */
+.audit-password-hash {
+    margin-top: 15px;
+    padding: 12px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 8px;
+    border: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.audit-password-hash code {
+    color: #a78bfa;
+    font-family: 'Courier New', monospace;
+    display: block;
+    overflow-x: auto;
+}
+
+/* Rollback Button */
+.btn-rollback {
+    margin-top: 15px;
+    padding: 10px 16px;
+    background: rgba(239, 68, 68, 0.15);
+    border: 1px solid rgba(239, 68, 68, 0.3);
+    border-radius: 8px;
+    color: #ef4444;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s;
+    width: fit-content;
+}
+
+.btn-rollback:hover {
+    background: rgba(239, 68, 68, 0.25);
+    border-color: rgba(239, 68, 68, 0.5);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(239, 68, 68, 0.3);
+}
+
+.btn-rollback i {
+    font-size: 0.9rem;
+}
+
+/* Audit Log Button in Password Item */
+.audit-log-btn {
+    background: rgba(124, 58, 237, 0.15);
+    border: 1px solid rgba(124, 58, 237, 0.3);
+    color: #a78bfa;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+.audit-log-btn:hover {
+    background: rgba(124, 58, 237, 0.25);
+    border-color: rgba(124, 58, 237, 0.5);
+    transform: translateY(-2px);
+}
+
+.audit-log-btn i {
+    font-size: 0.9rem;
+}
+
+/* Empty State */
+.audit-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.audit-empty-state i {
+    font-size: 4rem;
+    color: rgba(124, 58, 237, 0.3);
+    margin-bottom: 20px;
+}
+
+.audit-empty-state p {
+    font-size: 1rem;
+}
+
+/* Loading State */
+.audit-loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+/* Security Notice */
+.audit-security-notice {
+    background: rgba(16, 185, 129, 0.1);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    border-radius: 12px;
+    padding: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 12px;
+    align-items: start;
+}
+
+.audit-security-notice i {
+    color: #10b981;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.audit-security-notice-content {
+    flex: 1;
+}
+
+.audit-security-notice-title {
+    color: #10b981;
+    font-weight: 600;
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.audit-security-notice-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.85rem;
+    line-height: 1.5;
+}
+
+/* Stats Summary */
+.audit-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.audit-stat-card {
+    background: rgba(15, 15, 35, 0.6);
+    border: 1px solid rgba(124, 58, 237, 0.2);
+    border-radius: 12px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.3s;
+}
+
+.audit-stat-card:hover {
+    border-color: rgba(124, 58, 237, 0.4);
+    transform: translateY(-3px);
+}
+
+.audit-stat-number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #a78bfa;
+    margin-bottom: 8px;
+}
+
+.audit-stat-label {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Action Badge Colors */
+.audit-event-card[data-action="PASSWORD_CREATED"] .audit-timeline-dot {
+    background: #10b981;
+    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2),
+                0 0 20px rgba(16, 185, 129, 0.4);
+}
+
+.audit-event-card[data-action="PASSWORD_CHANGED"] .audit-timeline-dot {
+    background: #3b82f6;
+    box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.2),
+                0 0 20px rgba(59, 130, 246, 0.4);
+}
+
+.audit-event-card[data-action="PASSWORD_VIEWED"] .audit-timeline-dot {
+    background: #a78bfa;
+    box-shadow: 0 0 0 4px rgba(167, 139, 250, 0.2),
+                0 0 20px rgba(167, 139, 250, 0.4);
+}
+
+.audit-event-card[data-action="PASSWORD_DELETED"] .audit-timeline-dot {
+    background: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.2),
+                0 0 20px rgba(239, 68, 68, 0.4);
+}
+
+.audit-event-card[data-action="PASSWORD_ROLLED_BACK"] .audit-timeline-dot {
+    background: #f59e0b;
+    box-shadow: 0 0 0 4px rgba(245, 158, 11, 0.2),
+                0 0 20px rgba(245, 158, 11, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .audit-timeline {
+        padding-left: 30px;
+    }
+
+    .audit-timeline-dot {
+        left: -30px;
+        width: 16px;
+        height: 16px;
+    }
+
+    .audit-event-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .audit-event-details {
+        grid-template-columns: 1fr;
+    }
+
+    .btn-rollback {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Scrollbar Styling for Audit Content */
+#audit-log-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+#audit-log-content::-webkit-scrollbar-track {
+    background: rgba(15, 15, 35, 0.4);
+    border-radius: 10px;
+}
+
+#audit-log-content::-webkit-scrollbar-thumb {
+    background: rgba(124, 58, 237, 0.4);
+    border-radius: 10px;
+}
+
+#audit-log-content::-webkit-scrollbar-thumb:hover {
+    background: rgba(124, 58, 237, 0.6);
+}

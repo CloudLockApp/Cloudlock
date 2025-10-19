@@ -1,9 +1,7 @@
-// Password Manager Module - Full CRUD Operations with Security Scores
-
+// Password Manager Module - Full CRUD Operations with Audit Logging
 
 let passwords = [];
 let editingPasswordId = null;
-
 
 // Load all passwords for current user
 async function loadPasswords() {
@@ -12,15 +10,12 @@ async function loadPasswords() {
         return;
     }
 
-
     const userId = firebase.auth().currentUser.uid;
     const passwordList = document.getElementById('password-list');
-
 
     try {
         // Show loading state
         passwordList.innerHTML = '<div class="spinner"></div>';
-
 
         // Fetch passwords from Firestore
         const snapshot = await firebase.firestore()
@@ -29,22 +24,18 @@ async function loadPasswords() {
             .orderBy('createdAt', 'desc')
             .get();
 
-
         passwords = [];
         snapshot.forEach(doc => {
             passwords.push({ id: doc.id, ...doc.data() });
         });
 
-
         // Display passwords
         displayPasswords(passwords);
-
 
         // Generate AI alerts onto database
         if (typeof unsecureDetector === 'function') {
             unsecureDetector(passwords);
         }
-
 
         console.log(`📂 Loaded ${passwords.length} passwords`);
     } catch (error) {
@@ -58,8 +49,6 @@ async function loadPasswords() {
         showToast('Failed to load passwords', 'error');
     }
 }
-
-
 
 // Calculate password strength and return score info
 function getPasswordStrengthInfo(password) {
@@ -88,11 +77,9 @@ function getPasswordStrengthInfo(password) {
     return { scoreText, scoreColor, scoreClass, strength };
 }
 
-
 // Display passwords in the UI
 function displayPasswords(passwordsToDisplay) {
     const passwordList = document.getElementById('password-list');
-
 
     if (passwordsToDisplay.length === 0) {
         passwordList.innerHTML = `
@@ -103,7 +90,6 @@ function displayPasswords(passwordsToDisplay) {
         `;
         return;
     }
-
 
     passwordList.innerHTML = passwordsToDisplay.map(password => {
         const decryptedPassword = decrypt(password.password);
@@ -129,6 +115,12 @@ function displayPasswords(passwordsToDisplay) {
                     </div>
                     <div class="password-username">${password.username}</div>
                     ${password.url ? `<div style="font-size: 0.8rem; opacity: 0.6; margin-top: 5px;">${password.url}</div>` : ''}
+                    
+                    <!-- AUDIT LOG BUTTON -->
+                    <button class="audit-log-btn" onclick="openAuditLogModal('${password.id}')" title="View History">
+                        <i class="fas fa-history"></i>
+                        View History
+                    </button>
                 </div>
                 <div class="ai-insight-wrapper" style="margin-top: 10px; position: relative; overflow: visible;">
                     <button class="ai-insight-btn"
@@ -161,22 +153,18 @@ function displayPasswords(passwordsToDisplay) {
         `;
     }).join('');
 
-
     document.querySelectorAll('.ai-insight-btn').forEach(button => {
         const insightDiv = button.nextElementSibling;
-
 
         button.addEventListener('mouseenter', () => {
             insightDiv.style.display = 'block';
         });
-
 
         button.addEventListener('mouseleave', () => {
             insightDiv.style.display = 'none';
         });
     });
 }
-
 
 // Search passwords
 function searchPasswords() {
@@ -187,28 +175,23 @@ function searchPasswords() {
         return;
     }
 
-
     const filtered = passwords.filter(password =>
         password.siteName.toLowerCase().includes(searchTerm) ||
         password.username.toLowerCase().includes(searchTerm) ||
         (password.url && password.url.toLowerCase().includes(searchTerm))
     );
 
-
     displayPasswords(filtered);
 }
 
-
-// Save password (Create or Update)
+// Save password (Create or Update) - WITH AUDIT LOGGING
 async function savePassword(event) {
     event.preventDefault();
-
 
     if (!firebase.auth().currentUser) {
         showToast('Please login first', 'error');
         return;
     }
-
 
     const userId = firebase.auth().currentUser.uid;
     const siteName = document.getElementById('site-name').value;
@@ -218,10 +201,8 @@ async function savePassword(event) {
     const notes = document.getElementById('site-notes').value;
     const passwordId = document.getElementById('password-id').value;
 
-
     // Encrypt the password
     const encryptedPassword = encrypt(password);
-
 
     const passwordData = {
         userId: userId,
@@ -233,26 +214,64 @@ async function savePassword(event) {
         updatedAt: new Date()
     };
 
-
     try {
+        // Get location for audit log
+        const location = typeof getApproximateLocation === 'function' 
+            ? await getApproximateLocation() 
+            : 'Unknown';
+
         if (passwordId) {
-            // Update existing password
+            // UPDATE existing password
+            
+            // Get old password for audit log
+            const oldDoc = await firebase.firestore()
+                .collection('passwords')
+                .doc(passwordId)
+                .get();
+            
+            const oldPassword = oldDoc.exists ? decrypt(oldDoc.data().password) : '';
+            
+            // Update password
             await firebase.firestore()
                 .collection('passwords')
                 .doc(passwordId)
                 .update(passwordData);
+            
+            // LOG AUDIT EVENT - PASSWORD CHANGED
+            if (typeof logAuditEvent === 'function') {
+                await logAuditEvent(passwordId, 'PASSWORD_CHANGED', {
+                    previousPasswordHash: CryptoJS.SHA256(oldPassword).toString(),
+                    strengthBefore: typeof calculatePasswordStrengthForAudit === 'function' 
+                        ? calculatePasswordStrengthForAudit(oldPassword)
+                        : calculatePasswordStrength(oldPassword),
+                    strengthAfter: typeof calculatePasswordStrengthForAudit === 'function'
+                        ? calculatePasswordStrengthForAudit(password)
+                        : calculatePasswordStrength(password),
+                    location: location
+                });
+            }
            
             showToast('Password updated successfully!', 'success');
         } else {
-            // Create new password
+            // CREATE new password
             passwordData.createdAt = new Date();
-            await firebase.firestore()
+            
+            const docRef = await firebase.firestore()
                 .collection('passwords')
                 .add(passwordData);
+            
+            // LOG AUDIT EVENT - PASSWORD CREATED
+            if (typeof logAuditEvent === 'function') {
+                await logAuditEvent(docRef.id, 'PASSWORD_CREATED', {
+                    strengthAfter: typeof calculatePasswordStrengthForAudit === 'function'
+                        ? calculatePasswordStrengthForAudit(password)
+                        : calculatePasswordStrength(password),
+                    location: location
+                });
+            }
            
             showToast('Password saved successfully!', 'success');
         }
-
 
         closeModal('password-modal');
         loadPasswords();
@@ -262,12 +281,10 @@ async function savePassword(event) {
     }
 }
 
-
 // Edit password
 function editPassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
-
 
     // Populate modal with password data
     document.getElementById('modal-title').textContent = 'Edit Password';
@@ -278,27 +295,35 @@ function editPassword(passwordId) {
     document.getElementById('site-password').value = decrypt(password.password);
     document.getElementById('site-notes').value = decrypt(password.notes) || '';
 
-
     openModal('password-modal');
 }
 
-
-// Delete password
+// Delete password - WITH AUDIT LOGGING
 async function deletePassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
 
-
     const confirmed = confirm(`Are you sure you want to delete the password for ${password.siteName}?`);
     if (!confirmed) return;
 
-
     try {
+        // LOG AUDIT EVENT - PASSWORD DELETED (before deletion)
+        if (typeof logAuditEvent === 'function') {
+            const location = typeof getApproximateLocation === 'function' 
+                ? await getApproximateLocation() 
+                : 'Unknown';
+                
+            await logAuditEvent(passwordId, 'PASSWORD_DELETED', {
+                location: location,
+                deletedPasswordHash: CryptoJS.SHA256(decrypt(password.password)).toString()
+            });
+        }
+
+        // Delete the password
         await firebase.firestore()
             .collection('passwords')
             .doc(passwordId)
             .delete();
-
 
         showToast('Password deleted successfully', 'success');
         loadPasswords();
@@ -308,16 +333,13 @@ async function deletePassword(passwordId) {
     }
 }
 
-
-// Toggle password visibility
-function togglePasswordVisibility(passwordId) {
+// Toggle password visibility - WITH AUDIT LOGGING
+async function togglePasswordVisibility(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
 
-
     const passwordDisplay = document.getElementById(`pass-${passwordId}`);
     const eyeIcon = document.getElementById(`eye-${passwordId}`);
-
 
     if (passwordDisplay.style.display === 'none') {
         // Show password
@@ -325,6 +347,17 @@ function togglePasswordVisibility(passwordId) {
         passwordDisplay.style.display = 'block';
         eyeIcon.classList.remove('fa-eye');
         eyeIcon.classList.add('fa-eye-slash');
+        
+        // LOG AUDIT EVENT - PASSWORD VIEWED
+        if (typeof logAuditEvent === 'function') {
+            const location = typeof getApproximateLocation === 'function' 
+                ? await getApproximateLocation() 
+                : 'Unknown';
+                
+            logAuditEvent(passwordId, 'PASSWORD_VIEWED', {
+                location: location
+            });
+        }
     } else {
         // Hide password
         passwordDisplay.textContent = '•'.repeat(12);
@@ -334,28 +367,36 @@ function togglePasswordVisibility(passwordId) {
     }
 }
 
-
-// Copy password to clipboard
-function copyPassword(passwordId) {
+// Copy password to clipboard - WITH AUDIT LOGGING
+async function copyPassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
 
-
     const decryptedPassword = decrypt(password.password);
    
-    navigator.clipboard.writeText(decryptedPassword).then(() => {
+    navigator.clipboard.writeText(decryptedPassword).then(async () => {
         showToast('Password copied to clipboard!', 'success');
+        
+        // LOG AUDIT EVENT - PASSWORD VIEWED (copying = viewing)
+        if (typeof logAuditEvent === 'function') {
+            const location = typeof getApproximateLocation === 'function' 
+                ? await getApproximateLocation() 
+                : 'Unknown';
+                
+            logAuditEvent(passwordId, 'PASSWORD_VIEWED', {
+                location: location,
+                action: 'copied'
+            });
+        }
     }).catch(err => {
         showToast('Failed to copy password', 'error');
     });
 }
 
-
 // Generate secure password - Opens advanced generator
 function generateSecurePassword() {
     openPasswordGeneratorModal();
 }
-
 
 // Open add password modal
 function openAddPasswordModal() {
