@@ -32,10 +32,6 @@ async function loadPasswords() {
         // Display passwords
         displayPasswords(passwords);
 
-        // Generate AI alerts onto database
-        if (typeof unsecureDetector === 'function') {
-            unsecureDetector(passwords);
-        }
 
         console.log(`📂 Loaded ${passwords.length} passwords`);
     } catch (error) {
@@ -154,10 +150,15 @@ function displayPasswords(passwordsToDisplay) {
     }).join('');
 
     document.querySelectorAll('.ai-insight-btn').forEach(button => {
+        const passwordItem = button.closest('.password-item');
+        const passwordId = passwordItem.dataset.id;
         const insightDiv = button.nextElementSibling;
 
-        button.addEventListener('mouseenter', () => {
+        button.addEventListener('mouseenter', async () => {
             insightDiv.style.display = 'block';
+            if (typeof unsecureDetector === 'function') {
+                await unsecureDetector(passwordId);
+            }
         });
 
         button.addEventListener('mouseleave', () => {
@@ -184,7 +185,7 @@ function searchPasswords() {
     displayPasswords(filtered);
 }
 
-// Save password (Create or Update) - WITH AUDIT LOGGING
+// Save password (Create or Update) - with audit logging
 async function savePassword(event) {
     event.preventDefault();
 
