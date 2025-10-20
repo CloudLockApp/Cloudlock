@@ -12,8 +12,8 @@ const CONFIG = {
         appId: "1:723019842397:web:886db24af7ed5587351eb4"
     },
     
-    gemini: {
-        apiKey: 'AIzaSyDIXgGuWs6vB-zw7BCGlLn3pNcEZie3-MQ'
+    openrouter: {
+        apiKey:  "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"
     }
 };
 
