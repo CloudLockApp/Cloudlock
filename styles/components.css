@@ -1,6 +1,15 @@
 /* Component Styles */
 
 
+.ai-chat-notice {
+    text-align: center;
+    padding: 10px;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.6);
+    background: rgba(30, 30, 60, 0.4);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
 .ai-insights {
     background: rgba(215, 30, 30, 0.06);
     margin-bottom: 30px;
