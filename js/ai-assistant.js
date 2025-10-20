@@ -46,7 +46,7 @@ async function sendAIMessage() {
                 "messages": [
                   {
                     "role": "system",
-                    "content": "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security. This is what the user wrote, please respond accordingly."
+                    "content": "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security. This is what the user wrote, please respond accordingly. Eighty words maximum for the AI response."
                   },
                   {
                     "role": "user",
@@ -103,7 +103,7 @@ async function generateAIInsight(aiSummary) {
                 "messages": [
                   {
                     "role": "user",
-                    "content": "Analyze how strong or weak the password is based only on its metadata: " + aiSummary
+                    "content": "Analyze how strong or weak the password is based only on its metadata. Eighty words maximum for the AI response: " + aiSummary
                   }
                 ]
               })
