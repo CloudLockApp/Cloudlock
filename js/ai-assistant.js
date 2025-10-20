@@ -45,8 +45,12 @@ async function sendAIMessage() {
                 "model": "mistralai/mistral-small-3.2-24b-instruct:free",
                 "messages": [
                   {
+                    "role": "system",
+                    "content": "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security. This is what the user wrote, please respond accordingly."
+                  },
+                  {
                     "role": "user",
-                    "content": "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security."
+                    "content": message
                   }
                 ]
               })
