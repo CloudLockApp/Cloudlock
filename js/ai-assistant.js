@@ -42,7 +42,7 @@ async function sendAIMessage() {
                 "Content-Type": "application/json"
               },
               body: JSON.stringify({
-                "model": "mistralai/mistral-small-3.2-24b-instruct:free",
+                "model": "alibaba/tongyi-deepresearch-30b-a3b:free",
                 "messages": [
                   {
                     "role": "system",
@@ -99,7 +99,7 @@ async function generateAIInsight(aiSummary) {
                 "Content-Type": "application/json"
               },
               body: JSON.stringify({
-                "model": "mistralai/mistral-small-3.2-24b-instruct:free",
+                "model": "alibaba/tongyi-deepresearch-30b-a3b:free",
                 "messages": [
                   {
                     "role": "user",
