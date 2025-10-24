@@ -1,9 +1,8 @@
-// Password Manager Module - Full CRUD Operations with Audit Logging
+// Password Manager Module - CLEAN AI INSIGHTS BUTTON
 
 let passwords = [];
 let editingPasswordId = null;
 
-// Load all passwords for current user
 async function loadPasswords() {
     if (!firebase.auth().currentUser) {
         console.log('No user logged in');
@@ -14,10 +13,8 @@ async function loadPasswords() {
     const passwordList = document.getElementById('password-list');
 
     try {
-        // Show loading state
         passwordList.innerHTML = '<div class="spinner"></div>';
 
-        // Fetch passwords from Firestore
         const snapshot = await firebase.firestore()
             .collection('passwords')
             .where('userId', '==', userId)
@@ -29,10 +26,7 @@ async function loadPasswords() {
             passwords.push({ id: doc.id, ...doc.data() });
         });
 
-        // Display passwords
         displayPasswords(passwords);
-
-
         console.log(`📂 Loaded ${passwords.length} passwords`);
     } catch (error) {
         console.error('Error loading passwords:', error);
@@ -46,7 +40,6 @@ async function loadPasswords() {
     }
 }
 
-// Calculate password strength and return score info
 function getPasswordStrengthInfo(password) {
     const strength = calculatePasswordStrength(password);
    
@@ -73,7 +66,35 @@ function getPasswordStrengthInfo(password) {
     return { scoreText, scoreColor, scoreClass, strength };
 }
 
-// Display passwords in the UI
+function createCircularScore(strength, scoreColor, scoreText) {
+    const radius = 14;
+    const circumference = 2 * Math.PI * radius;
+    const offset = circumference - (strength / 100) * circumference;
+    
+    return `
+        <div class="circular-score-container" title="${scoreText}: ${strength}/100">
+            <svg width="36" height="36" class="circular-score">
+                <circle
+                    cx="18"
+                    cy="18"
+                    r="${radius}"
+                    fill="none"
+                    stroke="${scoreColor}"
+                    stroke-width="2.5"
+                    stroke-dasharray="${circumference}"
+                    stroke-dashoffset="${offset}"
+                    stroke-linecap="round"
+                    transform="rotate(-90 18 18)"
+                    style="filter: drop-shadow(0 0 3px ${scoreColor}); opacity: 0.9;"
+                />
+            </svg>
+            <div class="circular-score-text" style="color: ${scoreColor};">
+                ${strength}
+            </div>
+        </div>
+    `;
+}
+
 function displayPasswords(passwordsToDisplay) {
     const passwordList = document.getElementById('password-list');
 
@@ -91,57 +112,58 @@ function displayPasswords(passwordsToDisplay) {
         const decryptedPassword = decrypt(password.password);
         const maskedPassword = '•'.repeat(12);
         const strengthInfo = getPasswordStrengthInfo(decryptedPassword);
-
-        // Get security insight for this password
-        const insight = typeof showDashboardInsight === 'function'
-            ? showDashboardInsight(password.id, decryptedPassword, password.siteName)
-            : '';
        
         return `
             <div class="password-item" data-id="${password.id}">
                 <div class="password-info">
                     <div class="password-title">
                         <i class="fas fa-globe" style="margin-right: 8px; color: var(--primary-light);"></i>
-                        ${password.siteName}
-                        ${insight}
-                        <span class="password-strength-badge ${strengthInfo.scoreClass}" style="background: ${strengthInfo.scoreColor};">
-                            ${strengthInfo.scoreText}
-                            (Score: ${strengthInfo.strength})
-                        </span>
+                        <span style="flex: 1;">${password.siteName}</span>
                     </div>
                     <div class="password-username">${password.username}</div>
                     ${password.url ? `<div style="font-size: 0.8rem; opacity: 0.6; margin-top: 5px;">${password.url}</div>` : ''}
                     
-                    <!-- AUDIT LOG BUTTON -->
-                    <button class="audit-log-btn" onclick="openAuditLogModal('${password.id}')" title="View History">
-                        <i class="fas fa-history"></i>
-                        View History
-                    </button>
-                </div>
-                <div class="ai-insight-wrapper" style="margin-top: 10px; position: relative; overflow: visible;">
-                    <button class="ai-insight-btn"
-                        style="background: rgba(215, 30, 30, 0.06); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; font-size: 0.9rem; margin-left: 15px; margin-right: 15px; margin-bottom: 10px;">
-                        💡 AI Insight
-                    </button>
-                    <div id="ai-insight-${password.id}"
-                        class="ai-pass-insight"
-                        style="display: none; position: absolute; top: 120%; left: 0; background: #222; color: #fff; padding: 10px; border-radius: 6px; width: 250px; font-size: 0.9rem; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 1000;">
+                    <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                        <button class="audit-log-btn" onclick="openAuditLogModal('${password.id}')" title="View History">
+                            <i class="fas fa-history"></i>
+                            View History
+                        </button>
+                        
+                        <!-- AI INSIGHTS BUTTON - NO INLINE STYLES, USES CSS CLASS -->
+                        <div class="ai-insight-wrapper">
+                            <button class="ai-insight-btn">
+                                <i class="fas fa-brain"></i> AI Insights
+                            </button>
+                            <div id="ai-insight-${password.id}" class="ai-pass-insight" style="display: none;">
+                                <div style="text-align: center; padding: 10px;">
+                                    <i class="fas fa-spinner fa-spin" style="font-size: 1.5rem; color: #a78bfa;"></i>
+                                    <p style="margin-top: 10px; opacity: 0.8;">Loading AI insights...</p>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="password-actions">
-                    <button class="icon-btn" onclick="togglePasswordVisibility('${password.id}')" title="Show/Hide Password">
-                        <i class="fas fa-eye" id="eye-${password.id}"></i>
-                    </button>
-                    <button class="icon-btn" onclick="copyPassword('${password.id}')" title="Copy Password">
-                        <i class="fas fa-copy"></i>
-                    </button>
-                    <button class="icon-btn" onclick="editPassword('${password.id}')" title="Edit">
-                        <i class="fas fa-edit"></i>
-                    </button>
-                    <button class="icon-btn" onclick="deletePassword('${password.id}')" title="Delete" style="border-color: var(--danger);">
-                        <i class="fas fa-trash" style="color: var(--danger);"></i>
-                    </button>
+                
+                <!-- ACTIONS ROW WITH SCORE -->
+                <div class="password-actions-row">
+                    ${createCircularScore(strengthInfo.strength, strengthInfo.scoreColor, strengthInfo.scoreText)}
+                    
+                    <div class="password-actions">
+                        <button class="icon-btn" onclick="togglePasswordVisibility('${password.id}')" title="Show/Hide Password">
+                            <i class="fas fa-eye" id="eye-${password.id}"></i>
+                        </button>
+                        <button class="icon-btn" onclick="copyPassword('${password.id}')" title="Copy Password">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="icon-btn" onclick="editPassword('${password.id}')" title="Edit">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="icon-btn" onclick="deletePassword('${password.id}')" title="Delete" style="border-color: var(--danger);">
+                            <i class="fas fa-trash" style="color: var(--danger);"></i>
+                        </button>
+                    </div>
                 </div>
+                
                 <div class="password-display" id="pass-${password.id}" style="display: none; margin-top: 10px; padding: 10px; background: rgba(15, 15, 35, 0.8); border-radius: 8px; font-family: monospace;">
                     ${maskedPassword}
                 </div>
@@ -149,25 +171,36 @@ function displayPasswords(passwordsToDisplay) {
         `;
     }).join('');
 
+    // Add event listeners for AI Insights buttons
     document.querySelectorAll('.ai-insight-btn').forEach(button => {
         const passwordItem = button.closest('.password-item');
         const passwordId = passwordItem.dataset.id;
-        const insightDiv = button.nextElementSibling;
+        const insightDiv = document.getElementById(`ai-insight-${passwordId}`);
 
-        button.addEventListener('mouseenter', async () => {
-            insightDiv.style.display = 'block';
-            if (typeof unsecureDetector === 'function') {
-                await unsecureDetector(passwordId);
+        button.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            
+            if (insightDiv.style.display === 'none') {
+                insightDiv.style.display = 'block';
+                
+                if (typeof unsecureDetector === 'function' && !insightDiv.dataset.loaded) {
+                    await unsecureDetector(passwordId);
+                }
+            } else {
+                insightDiv.style.display = 'none';
             }
         });
+    });
 
-        button.addEventListener('mouseleave', () => {
-            insightDiv.style.display = 'none';
-        });
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.ai-insight-wrapper')) {
+            document.querySelectorAll('.ai-pass-insight').forEach(insight => {
+                insight.style.display = 'none';
+            });
+        }
     });
 }
 
-// Search passwords
 function searchPasswords() {
     const searchTerm = document.getElementById('search-passwords').value.toLowerCase();
    
@@ -185,7 +218,6 @@ function searchPasswords() {
     displayPasswords(filtered);
 }
 
-// Save password (Create or Update) - with audit logging
 async function savePassword(event) {
     event.preventDefault();
 
@@ -202,7 +234,6 @@ async function savePassword(event) {
     const notes = document.getElementById('site-notes').value;
     const passwordId = document.getElementById('password-id').value;
 
-    // Encrypt the password
     const encryptedPassword = encrypt(password);
 
     const passwordData = {
@@ -216,15 +247,11 @@ async function savePassword(event) {
     };
 
     try {
-        // Get location for audit log
         const location = typeof getApproximateLocation === 'function' 
             ? await getApproximateLocation() 
             : 'Unknown';
 
         if (passwordId) {
-            // UPDATE existing password
-            
-            // Get old password for audit log
             const oldDoc = await firebase.firestore()
                 .collection('passwords')
                 .doc(passwordId)
@@ -232,41 +259,31 @@ async function savePassword(event) {
             
             const oldPassword = oldDoc.exists ? decrypt(oldDoc.data().password) : '';
             
-            // Update password
             await firebase.firestore()
                 .collection('passwords')
                 .doc(passwordId)
                 .update(passwordData);
             
-            // LOG AUDIT EVENT - PASSWORD CHANGED
             if (typeof logAuditEvent === 'function') {
                 await logAuditEvent(passwordId, 'PASSWORD_CHANGED', {
                     previousPasswordHash: CryptoJS.SHA256(oldPassword).toString(),
-                    strengthBefore: typeof calculatePasswordStrengthForAudit === 'function' 
-                        ? calculatePasswordStrengthForAudit(oldPassword)
-                        : calculatePasswordStrength(oldPassword),
-                    strengthAfter: typeof calculatePasswordStrengthForAudit === 'function'
-                        ? calculatePasswordStrengthForAudit(password)
-                        : calculatePasswordStrength(password),
+                    strengthBefore: calculatePasswordStrength(oldPassword),
+                    strengthAfter: calculatePasswordStrength(password),
                     location: location
                 });
             }
            
             showToast('Password updated successfully!', 'success');
         } else {
-            // CREATE new password
             passwordData.createdAt = new Date();
             
             const docRef = await firebase.firestore()
                 .collection('passwords')
                 .add(passwordData);
             
-            // LOG AUDIT EVENT - PASSWORD CREATED
             if (typeof logAuditEvent === 'function') {
                 await logAuditEvent(docRef.id, 'PASSWORD_CREATED', {
-                    strengthAfter: typeof calculatePasswordStrengthForAudit === 'function'
-                        ? calculatePasswordStrengthForAudit(password)
-                        : calculatePasswordStrength(password),
+                    strengthAfter: calculatePasswordStrength(password),
                     location: location
                 });
             }
@@ -282,12 +299,10 @@ async function savePassword(event) {
     }
 }
 
-// Edit password
 function editPassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
 
-    // Populate modal with password data
     document.getElementById('modal-title').textContent = 'Edit Password';
     document.getElementById('password-id').value = password.id;
     document.getElementById('site-name').value = password.siteName;
@@ -299,7 +314,6 @@ function editPassword(passwordId) {
     openModal('password-modal');
 }
 
-// Delete password - WITH AUDIT LOGGING
 async function deletePassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
@@ -308,7 +322,6 @@ async function deletePassword(passwordId) {
     if (!confirmed) return;
 
     try {
-        // LOG AUDIT EVENT - PASSWORD DELETED (before deletion)
         if (typeof logAuditEvent === 'function') {
             const location = typeof getApproximateLocation === 'function' 
                 ? await getApproximateLocation() 
@@ -320,7 +333,6 @@ async function deletePassword(passwordId) {
             });
         }
 
-        // Delete the password
         await firebase.firestore()
             .collection('passwords')
             .doc(passwordId)
@@ -334,7 +346,6 @@ async function deletePassword(passwordId) {
     }
 }
 
-// Toggle password visibility - WITH AUDIT LOGGING
 async function togglePasswordVisibility(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
@@ -343,13 +354,11 @@ async function togglePasswordVisibility(passwordId) {
     const eyeIcon = document.getElementById(`eye-${passwordId}`);
 
     if (passwordDisplay.style.display === 'none') {
-        // Show password
         passwordDisplay.textContent = decrypt(password.password);
         passwordDisplay.style.display = 'block';
         eyeIcon.classList.remove('fa-eye');
         eyeIcon.classList.add('fa-eye-slash');
         
-        // LOG AUDIT EVENT - PASSWORD VIEWED
         if (typeof logAuditEvent === 'function') {
             const location = typeof getApproximateLocation === 'function' 
                 ? await getApproximateLocation() 
@@ -360,7 +369,6 @@ async function togglePasswordVisibility(passwordId) {
             });
         }
     } else {
-        // Hide password
         passwordDisplay.textContent = '•'.repeat(12);
         passwordDisplay.style.display = 'none';
         eyeIcon.classList.remove('fa-eye-slash');
@@ -368,7 +376,6 @@ async function togglePasswordVisibility(passwordId) {
     }
 }
 
-// Copy password to clipboard - WITH AUDIT LOGGING
 async function copyPassword(passwordId) {
     const password = passwords.find(p => p.id === passwordId);
     if (!password) return;
@@ -378,7 +385,6 @@ async function copyPassword(passwordId) {
     navigator.clipboard.writeText(decryptedPassword).then(async () => {
         showToast('Password copied to clipboard!', 'success');
         
-        // LOG AUDIT EVENT - PASSWORD VIEWED (copying = viewing)
         if (typeof logAuditEvent === 'function') {
             const location = typeof getApproximateLocation === 'function' 
                 ? await getApproximateLocation() 
@@ -394,12 +400,10 @@ async function copyPassword(passwordId) {
     });
 }
 
-// Generate secure password - Opens advanced generator
 function generateSecurePassword() {
     openPasswordGeneratorModal();
 }
 
-// Open add password modal
 function openAddPasswordModal() {
     openModal('password-modal');
     document.getElementById('modal-title').textContent = 'Add New Password';
