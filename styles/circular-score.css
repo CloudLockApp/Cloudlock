@@ -92,8 +92,9 @@
 .ai-pass-insight {
     display: none;
     position: absolute;
-    top: calc(100% + 8px);
-    left: 0;
+    /* Position to the right of the button by default to avoid left clipping */
+    left: calc(100% + 8px);
+    top: 0;
     background: rgba(15, 15, 35, 0.95);
     color: #fff;
     padding: 15px;
