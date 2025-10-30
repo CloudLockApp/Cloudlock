@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="styles/security-insights.css">
     <link rel="stylesheet" href="styles/audit-log.css">
     <link rel="stylesheet" href="styles/circular-score.css">
+    <link rel="stylesheet" href="styles/password-sharing.css">
 
     <style>
         .dashboard-header h1::after {
@@ -497,6 +498,17 @@
                 <hr style="border: none; border-top: 1px solid rgba(124, 58, 237, 0.2); margin: 30px 0;">
 
                 <div class="settings-section">
+                    <h4><i class="fas fa-share-alt"></i> Shared Passwords</h4>
+                    <p style="opacity: 0.7; margin-bottom: 15px;">Manage passwords you've shared with others.</p>
+                    
+                    <button class="btn" onclick="viewSharedPasswords()">
+                        <i class="fas fa-list"></i> View Shared Links
+                    </button>
+                </div>
+
+                <hr style="border: none; border-top: 1px solid rgba(124, 58, 237, 0.2); margin: 30px 0;">
+
+                <div class="settings-section">
                     <h4><i class="fas fa-clock"></i> Session Timeout</h4>
                     <p style="opacity: 0.7; margin-bottom: 15px;">Auto-logout after period of inactivity.</p>
                     
@@ -667,6 +679,7 @@
     <script src="js/advanced-generator.js"></script>
     <script src="js/security-insights.js"></script>
     <script src="js/interactive-background.js"></script>
+    <script src="js/password-sharing.js"></script>
 
     <script>
         let encryptionKey = null;

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Password - CloudLock</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles/main.css?v=3">
+    <link rel="stylesheet" href="styles/animations.css?v=3">
+    <link rel="stylesheet" href="styles/components.css?v=5">
+    <link rel="stylesheet" href="styles/password-sharing.css">
+</head>
+<body>
+    <div class="bg-animation">
+        <div class="floating-orb" style="width: 200px; height: 200px; top: 10%; left: 10%;"></div>
+        <div class="floating-orb" style="width: 150px; height: 150px; top: 70%; left: 80%; animation-delay: -7s;"></div>
+        <div class="floating-orb" style="width: 100px; height: 100px; top: 40%; left: 50%; animation-delay: -14s;"></div>
+    </div>
+
+    <nav>
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-shield-alt"></i>
+                <span>CloudLock</span>
+            </div>
+            <a href="index.html" class="btn" style="padding: 10px 20px;">
+                <i class="fas fa-home"></i> Home
+            </a>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div id="shared-password-container" class="shared-password-container">
+            <!-- Loading State -->
+            <div id="loading-state" class="shared-state">
+                <div class="spinner" style="width: 60px; height: 60px; border-width: 4px;"></div>
+                <h2>Retrieving Shared Password...</h2>
+                <p>Please wait while we decrypt your secure data.</p>
+            </div>
+
+            <!-- Access Code Required -->
+            <div id="code-required-state" class="shared-state" style="display: none;">
+                <div class="shared-icon">
+                    <i class="fas fa-key"></i>
+                </div>
+                <h2>Access Code Required</h2>
+                <p>This password is protected with an access code.</p>
+                
+                <form onsubmit="verifyAccessCode(event)" style="max-width: 300px; margin: 30px auto 0;">
+                    <div class="form-group">
+                        <input type="text" id="access-code-input" placeholder="Enter 6-digit code" maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 0.5rem;">
+                    </div>
+                    <button type="submit" class="btn btn-full btn-primary">
+                        <i class="fas fa-unlock"></i> Unlock Password
+                    </button>
+                </form>
+            </div>
+
+            <!-- Password Display -->
+            <div id="password-display-state" class="shared-state" style="display: none;">
+                <div class="shared-icon success">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h2>Shared Password</h2>
+                
+                <div class="shared-password-card">
+                    <div class="shared-password-header">
+                        <i class="fas fa-globe"></i>
+                        <h3 id="shared-site-name">Loading...</h3>
+                    </div>
+
+                    <div class="shared-password-field">
+                        <label>Username / Email</label>
+                        <div class="shared-value-container">
+                            <input type="text" id="shared-username" readonly>
+                            <button class="btn-copy-shared" onclick="copySharedField('shared-username')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="shared-password-field">
+                        <label>Password</label>
+                        <div class="shared-value-container">
+                            <input type="password" id="shared-password" readonly>
+                            <button class="btn-copy-shared" onclick="copySharedField('shared-password')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="btn-copy-shared" onclick="toggleSharedPasswordVisibility()">
+                                <i class="fas fa-eye" id="shared-eye-icon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="shared-password-field" id="shared-url-field" style="display: none;">
+                        <label>Website URL</label>
+                        <div class="shared-value-container">
+                            <input type="text" id="shared-url" readonly>
+                            <a id="shared-url-link" href="#" target="_blank" class="btn-copy-shared">
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <div class="shared-password-field" id="shared-notes-field" style="display: none;">
+                        <label>Notes</label>
+                        <textarea id="shared-notes" readonly rows="3"></textarea>
+                    </div>
+                </div>
+
+                <div class="shared-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Security Notice:</strong> This password was shared securely. Make sure you're on a trusted device.
+                    </div>
+                </div>
+
+                <div class="shared-info-footer">
+                    <div class="shared-info-item">
+                        <i class="fas fa-user"></i>
+                        <span>Shared by: <strong id="shared-owner-email">Loading...</strong></span>
+                    </div>
+                    <div class="shared-info-item">
+                        <i class="fas fa-clock"></i>
+                        <span>Expires: <strong id="shared-expires">Loading...</strong></span>
+                    </div>
+                    <div class="shared-info-item">
+                        <i class="fas fa-eye"></i>
+                        <span>Views: <strong id="shared-views">Loading...</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Error State -->
+            <div id="error-state" class="shared-state" style="display: none;">
+                <div class="shared-icon error">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <h2 id="error-title">Link Expired</h2>
+                <p id="error-message">This shared password link has expired or is no longer available.</p>
+                
+                <a href="index.html" class="btn btn-primary" style="margin-top: 30px;">
+                    <i class="fas fa-home"></i> Go to CloudLock
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+
+    <script src="js/config.js"></script>
+    <script src="js/firebase-init.js"></script>
+    <script src="js/ui-utils.js"></script>
+    <script src="js/encryption.js"></script>
+    <script src="js/interactive-background.js"></script>
+
+    <script>
+        let currentShareData = null;
+        let shareToken = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            shareToken = urlParams.get('token');
+
+            if (!shareToken) {
+                showError('Invalid Link', 'No share token provided.');
+                return;
+            }
+
+            await loadSharedPassword();
+        });
+
+        async function loadSharedPassword() {
+            try {
+                const doc = await firebase.firestore()
+                    .collection('shared-passwords')
+                    .doc(shareToken)
+                    .get();
+
+                if (!doc.exists) {
+                    showError('Link Not Found', 'This shared password link does not exist.');
+                    return;
+                }
+
+                const shareData = doc.data();
+
+                // Check expiration
+                const now = new Date();
+                const expiresAt = shareData.expiresAt.toDate();
+                if (expiresAt < now) {
+                    showError('Link Expired', `This link expired on ${expiresAt.toLocaleDateString()}.`);
+                    return;
+                }
+
+                // Check max views
+                if (shareData.maxViews !== -1 && shareData.viewCount >= shareData.maxViews) {
+                    showError('Maximum Views Reached', 'This shared password has reached its view limit.');
+                    return;
+                }
+
+                currentShareData = shareData;
+
+                // Check if access code required
+                if (shareData.requireCode) {
+                    showCodeRequired();
+                } else {
+                    await displayPassword(shareData);
+                }
+
+            } catch (error) {
+                console.error('Error loading shared password:', error);
+                showError('Error', 'Failed to load shared password. Please try again.');
+            }
+        }
+
+        function showCodeRequired() {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('code-required-state').style.display = 'block';
+            document.getElementById('access-code-input').focus();
+        }
+
+        async function verifyAccessCode(event) {
+            event.preventDefault();
+            const code = document.getElementById('access-code-input').value;
+
+            if (code.length !== 6) {
+                showToast('Please enter a 6-digit code', 'error');
+                return;
+            }
+
+            const hashedCode = CryptoJS.SHA256(code).toString();
+
+            if (hashedCode !== currentShareData.accessCode) {
+                showToast('Incorrect access code', 'error');
+                document.getElementById('access-code-input').value = '';
+                return;
+            }
+
+            await displayPassword(currentShareData);
+        }
+
+        async function displayPassword(shareData) {
+            try {
+                // Decrypt password data
+                encryptionKey = shareToken.substring(0, 32);
+                const decryptedData = JSON.parse(decrypt(shareData.passwordData));
+
+                // Update view count
+                await firebase.firestore()
+                    .collection('shared-passwords')
+                    .doc(shareToken)
+                    .update({
+                        viewCount: firebase.firestore.FieldValue.increment(1)
+                    });
+
+                // Populate UI
+                document.getElementById('shared-site-name').textContent = decryptedData.siteName;
+                document.getElementById('shared-username').value = decryptedData.username;
+                document.getElementById('shared-password').value = decryptedData.password;
+                
+                if (decryptedData.url) {
+                    document.getElementById('shared-url').value = decryptedData.url;
+                    document.getElementById('shared-url-link').href = decryptedData.url;
+                    document.getElementById('shared-url-field').style.display = 'block';
+                }
+
+                if (decryptedData.notes) {
+                    document.getElementById('shared-notes').value = decryptedData.notes;
+                    document.getElementById('shared-notes-field').style.display = 'block';
+                }
+
+                document.getElementById('shared-owner-email').textContent = shareData.ownerEmail;
+                document.getElementById('shared-expires').textContent = shareData.expiresAt.toDate().toLocaleDateString();
+                document.getElementById('shared-views').textContent = `${shareData.viewCount + 1} / ${shareData.maxViews === -1 ? '∞' : shareData.maxViews}`;
+
+                // Show password display
+                document.getElementById('loading-state').style.display = 'none';
+                document.getElementById('code-required-state').style.display = 'none';
+                document.getElementById('password-display-state').style.display = 'block';
+
+            } catch (error) {
+                console.error('Error displaying password:', error);
+                showError('Decryption Error', 'Failed to decrypt password data.');
+            }
+        }
+
+        function toggleSharedPasswordVisibility() {
+            const input = document.getElementById('shared-password');
+            const icon = document.getElementById('shared-eye-icon');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
+
+        function copySharedField(fieldId) {
+            const input = document.getElementById(fieldId);
+            input.select();
+            navigator.clipboard.writeText(input.value).then(() => {
+                showToast('Copied to clipboard!', 'success');
+            });
+        }
+
+        function showError(title, message) {
+            document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('error-title').textContent = title;
+            document.getElementById('error-message').textContent = message;
+            document.getElementById('error-state').style.display = 'block';
+        }
+    </script>
+</body>
+</html>

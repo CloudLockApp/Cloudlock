@@ -129,7 +129,7 @@ function displayPasswords(passwordsToDisplay) {
                             View History
                         </button>
                         
-                        <!-- AI INSIGHTS BUTTON - NO INLINE STYLES, USES CSS CLASS -->
+                        <!-- AI INSIGHTS BUTTON -->
                         <div class="ai-insight-wrapper">
                             <button class="ai-insight-btn">
                                 <i class="fas fa-brain"></i> AI Insights
@@ -154,6 +154,9 @@ function displayPasswords(passwordsToDisplay) {
                         </button>
                         <button class="icon-btn" onclick="copyPassword('${password.id}')" title="Copy Password">
                             <i class="fas fa-copy"></i>
+                        </button>
+                        <button class="icon-btn" onclick="openSharePasswordModal('${password.id}')" title="Share Password" style="border-color: #10b981;">
+                            <i class="fas fa-share-alt" style="color: #10b981;"></i>
                         </button>
                         <button class="icon-btn" onclick="editPassword('${password.id}')" title="Edit">
                             <i class="fas fa-edit"></i>
