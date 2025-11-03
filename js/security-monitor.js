@@ -138,6 +138,48 @@ function calculatePasswordStrength(password) {
     if (/^[0-9]+$/.test(password)) strength -= 30; // Only numbers
     if (/^[a-zA-Z]+$/.test(password)) strength -= 30; // Only letters
 
+    (function applySequentialPenalty() {
+      const lower = password.toLowerCase();
+      const sources = [
+        "abcdefghijklmnopqrstuvwxyz",
+        "01234567890",
+        "qwertyuiopasdfghjklzxcvbnm"
+      ];
+
+      function countRuns(source) {
+        let penalty = 0;
+
+        // forward + reversed
+        const reversed = source.split("").reverse().join("");
+        const both = [source, reversed];
+    
+        for (const seq of both) {
+          for (let i = 0; i < lower.length - 2; i++) {
+            const slice = lower.substr(i, 3);
+            if (seq.includes(slice)) {
+              penalty += 20;
+            }
+          }
+        }
+        return penalty;
+      }
+    
+      for (const s of sources) {
+        strength -= countRuns(s);
+      }
+    })();
+    
+    // Top common passwords mostly according to NordPass and SplashData
+    const commonPasswords = ["password", "qwerty123", "secret", "iloveyou", "dragon", "monkey", "1q2w3e4r", "admin", "lovely", "welcome", "princess", "dragon", "hello", "hi", "google", "computer", "login", "football", "starwars", "baseball", "superman"];
+
+    const lower = password.toLowerCase();
+    for (const w of commonPasswords) {
+        if (lower.includes(w)) {
+            strength -= 100;
+            break; // no need to continue checking further
+        }
+    }
+
     if (strength > 100) strength = 100;
     if (strength < 0) strength = 0;
 
