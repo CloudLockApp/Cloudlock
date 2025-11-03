@@ -170,11 +170,11 @@ async function generateShareLink() {
             siteName: password.siteName,
             url: password.url || '',
             username: password.username,
-            password: decrypt(password.password), // Decrypt with user's key
+            password: decrypt(password.password), // Decrypt with user's key first
             notes: password.notes ? decrypt(password.notes) : ''
         };
 
-        // ⚠️ CRITICAL FIX: Encrypt with share token, NOT user's master password
+        // ✅ FIXED: Encrypt with share token, NOT user's master password
         const shareKey = shareToken.substring(0, 32);
         const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(shareData), shareKey).toString();
 
