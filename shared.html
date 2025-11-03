@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="styles/password-sharing.css">
     
     <style>
-        /* Matrix Decryption Effect - Refined */
+        /* Matrix Decryption Effect - PURPLE THEME */
         .matrix-decrypt {
             font-family: 'Courier New', monospace;
             letter-spacing: 1px;
@@ -20,8 +20,8 @@
         }
 
         .matrix-decrypt.decrypting {
-            color: #00ff00;
-            text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+            color: #a78bfa; /* Purple instead of green */
+            text-shadow: 0 0 8px rgba(167, 139, 250, 0.8);
             animation: subtleGlitch 0.1s infinite;
         }
 
@@ -38,8 +38,8 @@
 
         @keyframes revealPassword {
             0% {
-                color: #00ff00;
-                text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+                color: #a78bfa; /* Purple */
+                text-shadow: 0 0 15px rgba(167, 139, 250, 0.9);
                 letter-spacing: 3px;
             }
             100% {
@@ -49,7 +49,7 @@
             }
         }
 
-        /* Matrix Rain Effect - Toned Down */
+        /* Matrix Rain Effect - PURPLE */
         .matrix-rain {
             position: fixed;
             top: 0;
@@ -63,7 +63,7 @@
         }
 
         .matrix-rain.active {
-            opacity: 0.08; /* Much more subtle */
+            opacity: 0.15; /* Subtle purple rain */
         }
 
         .matrix-rain canvas {
@@ -72,14 +72,14 @@
             height: 100%;
         }
 
-        /* Decryption Status */
+        /* Decryption Status - PURPLE */
         .decrypt-status {
             text-align: center;
             margin: 10px 0;
             font-family: 'Courier New', monospace;
-            color: #00ff00;
+            color: #a78bfa; /* Purple */
             font-size: 0.8rem;
-            text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+            text-shadow: 0 0 8px rgba(167, 139, 250, 0.8);
             letter-spacing: 0.5px;
             opacity: 0;
             transition: opacity 0.3s;
@@ -90,7 +90,7 @@
         }
 
         .decrypt-status.complete {
-            color: #10b981;
+            color: #10b981; /* Keep success green */
             animation: fadeOut 1s ease forwards;
             animation-delay: 1s;
         }
@@ -101,7 +101,7 @@
             }
         }
 
-        /* Scan Line Effect (subtle) */
+        /* Scan Line Effect - PURPLE */
         .scanning::after {
             content: '';
             position: absolute;
@@ -111,7 +111,7 @@
             height: 2px;
             background: linear-gradient(90deg, 
                 transparent, 
-                rgba(0, 255, 0, 0.5), 
+                rgba(167, 139, 250, 0.8), /* Purple */
                 transparent
             );
             animation: scanLine 1.5s ease-in-out;
@@ -129,7 +129,7 @@
     </style>
 </head>
 <body>
-    <!-- Matrix Rain Background -->
+    <!-- Matrix Rain Background (Purple) -->
     <div class="matrix-rain" id="matrix-rain">
         <canvas id="matrix-canvas"></canvas>
     </div>
@@ -284,9 +284,10 @@
     <script>
         let currentShareData = null;
         let shareToken = null;
-        let passwordRevealed = false; // Track if password is currently shown
+        let passwordRevealed = false;
+        let matrixInterval = null;
 
-        // Matrix Rain Effect
+        // Purple Matrix Rain Effect
         function startMatrixRain() {
             const canvas = document.getElementById('matrix-canvas');
             const ctx = canvas.getContext('2d');
@@ -303,7 +304,8 @@
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 
-                ctx.fillStyle = '#0F0';
+                // Purple color for the matrix rain
+                ctx.fillStyle = '#a78bfa';
                 ctx.font = fontSize + 'px monospace';
                 
                 for (let i = 0; i < drops.length; i++) {
@@ -317,13 +319,21 @@
                 }
             }
             
-            setInterval(draw, 33);
+            matrixInterval = setInterval(draw, 33);
             
             // Resize handler
             window.addEventListener('resize', () => {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight;
             });
+        }
+
+        function stopMatrixRain() {
+            if (matrixInterval) {
+                clearInterval(matrixInterval);
+                matrixInterval = null;
+            }
+            document.getElementById('matrix-rain').classList.remove('active');
         }
 
         // Matrix Decryption Animation
@@ -336,6 +346,10 @@
                 
                 inputElement.classList.add('decrypting');
                 inputElement.type = 'text'; // Show the animation
+                
+                // Start purple matrix rain
+                startMatrixRain();
+                document.getElementById('matrix-rain').classList.add('active');
                 
                 // Add scanning effect
                 const container = inputElement.closest('.shared-value-container');
@@ -363,8 +377,10 @@
                         inputElement.classList.remove('decrypting');
                         inputElement.classList.add('decrypted');
                         
-                        // Keep as text (revealed) - don't hide
-                        // inputElement.type = 'password'; // REMOVED
+                        // Stop matrix rain after a short delay
+                        setTimeout(() => {
+                            stopMatrixRain();
+                        }, 1000);
                         
                         resolve();
                     }
@@ -394,10 +410,6 @@
                 showError('Invalid Link', 'No share token provided.');
                 return;
             }
-
-            // Start matrix rain (very subtle)
-            startMatrixRain();
-            document.getElementById('matrix-rain').classList.add('active');
 
             await loadSharedPassword();
         });
@@ -476,7 +488,7 @@
                 // Show decryption status
                 updateDecryptStatus('DECRYPTING...');
                 
-                // ⚠️ CRITICAL FIX: Decrypt with share token, NOT user's master password
+                // ✅ FIXED: Decrypt with share token, NOT user's master password
                 const shareKey = shareToken.substring(0, 32);
                 
                 await new Promise(resolve => setTimeout(resolve, 500));
@@ -541,7 +553,7 @@
             const actualPassword = input.dataset.actualPassword;
             
             if (!passwordRevealed) {
-                // Reveal with matrix effect
+                // Reveal with purple matrix effect
                 updateDecryptStatus('REVEALING PASSWORD...');
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
@@ -551,6 +563,7 @@
                 passwordRevealed = true;
             } else {
                 // Hide password
+                stopMatrixRain(); // Stop matrix rain when hiding
                 input.type = 'password';
                 input.value = '•'.repeat(actualPassword.length);
                 input.classList.remove('decrypted', 'decrypting');
@@ -579,7 +592,6 @@
 
         function showError(title, message) {
             document.getElementById('loading-state').style.display = 'none';
-            document.getElementById('matrix-rain').classList.remove('active');
             document.getElementById('error-title').textContent = title;
             document.getElementById('error-message').textContent = message;
             document.getElementById('error-state').style.display = 'block';
