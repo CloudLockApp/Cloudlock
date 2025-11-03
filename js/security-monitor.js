@@ -170,7 +170,7 @@ function calculatePasswordStrength(password) {
     })();
     
     // Top common passwords mostly according to NordPass and SplashData
-    const commonPasswords = ["password", "qwerty123", "secret", "iloveyou", "dragon", "monkey", "1q2w3e4r", "admin", "lovely", "welcome", "princess", "dragon", "hello", "hi", "google", "computer", "login", "football", "starwars", "baseball", "superman"];
+    const commonPasswords = ["password", "qwerty123", "secret", "iloveyou", "dragon", "monkey", "1q2w3e4r", "admin", "lovely", "welcome", "princess", "hello", "hi", "google", "computer", "login", "football", "starwars", "baseball", "superman"];
 
     const lower = password.toLowerCase();
     for (const w of commonPasswords) {

@@ -134,12 +134,75 @@ async function unsecureDetector(passwordId) {
     // Show loading state
     aiElement.innerHTML = '<div style="padding: 10px;">Loading insight...</div>';
 
+    let sequentialCount = 0;
+    let commonCount = 0;
+
+    // count sequential char runs
+    function countSequentialRuns(str) {
+        const lower = str.toLowerCase();
+        const sources = [
+            "abcdefghijklmnopqrstuvwxyz",
+            "0123456789",
+            "qwertyuiopasdfghjklzxcvbnm"
+        ];
+        let count = 0;
+
+        function seqCount(source) {
+            const reversed = source.split("").reverse().join("");
+            const both = [source, reversed];
+    
+            for (const seq of both) {
+                for (let i = 0; i < lower.length - 2; i++) {
+                    const slice = lower.substr(i, 3);
+                    if (seq.includes(slice)) count++;
+                }
+            }
+        }
+    
+        sources.forEach(seqCount);
+        sequentialCount = count;
+        return sequentialCount;
+    }
+
+    // count common words
+    function countCommonWords(str) {
+        const commonPasswords = ["password", "qwerty123", "secret", "iloveyou", "dragon", "monkey", "1q2w3e4r", "admin", "lovely", "welcome", "princess", "hello", "hi", "google", "computer", "login", "football", "starwars", "baseball", "superman"];
+        const lower = str.toLowerCase();
+        let count = 0;
+    
+        for (const word of commonPasswords) {
+            if (lower.includes(word)) count++;
+        }
+        commonCount = count;
+        return commonCount;
+    }
+
+    function countRepeatedCharacters(str) {
+      const freq = {};
+      for (const ch of str) {
+        freq[ch] = (freq[ch] || 0) + 1;
+      }
+
+      let repeatedTotal = 0;
+      for (const ch in freq) {
+        if (freq[ch] > 1) {
+          repeatedTotal += freq[ch];
+        }
+      }
+      return repeatedTotal;
+    }
+
+
+
     const decrypted = decrypt(password.password);
     const length = decrypted.length;
     const upperCount = /[A-Z]/.test(decrypted);
     const lowerCount = /[a-z]/.test(decrypted);
     const numCount = /[0-9]/.test(decrypted);
     const symbolCount = /[^A-Za-z0-9]/.test(decrypted);
+    sequentialCount = countSequentialRuns(decrypted);
+    commonCount = countCommonWords(decrypted);
+    const repeatedCount = countRepeatedCharacters(decrypted);
 
     // Count password reuse
     const decryptedPasswords = passwords.map(p => decrypt(p.password));
@@ -157,6 +220,9 @@ async function unsecureDetector(passwordId) {
         ${numCount ? "includes" : "does not include"} numbers,
         and ${symbolCount ? "includes" : "does not include"} symbols.
         It is used on ${reusedCount} accounts and was last updated ${daysOld} days ago.
+        It has ${sequentialCount} sequential characters. Count should be zero.
+        It has ${commonCount} common words/passwords. Count should be zero.
+        It has ${repeatedCount} repeated characters. Count should be low.
         Provide a small paragraph that analyzes the security situation. Provide tips. Ten sentences max.
     `;
 
