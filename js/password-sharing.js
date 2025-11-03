@@ -140,7 +140,7 @@ function generateShareCode() {
     document.getElementById('share-code').value = code;
 }
 
-// Generate share link
+// Generate share link - FIXED VERSION
 async function generateShareLink() {
     const modal = document.getElementById('share-password-modal');
     const passwordId = modal.dataset.passwordId;
@@ -170,13 +170,13 @@ async function generateShareLink() {
             siteName: password.siteName,
             url: password.url || '',
             username: password.username,
-            password: decrypt(password.password), // Decrypt to re-encrypt with share key
+            password: decrypt(password.password), // Decrypt with user's key
             notes: password.notes ? decrypt(password.notes) : ''
         };
 
-        // Encrypt with share-specific key
+        // ⚠️ CRITICAL FIX: Encrypt with share token, NOT user's master password
         const shareKey = shareToken.substring(0, 32);
-        const encryptedData = encrypt(JSON.stringify(shareData));
+        const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(shareData), shareKey).toString();
 
         // Store in Firestore
         await firebase.firestore().collection('shared-passwords').doc(shareToken).set({

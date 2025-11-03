@@ -10,8 +10,130 @@
     <link rel="stylesheet" href="styles/animations.css?v=3">
     <link rel="stylesheet" href="styles/components.css?v=5">
     <link rel="stylesheet" href="styles/password-sharing.css">
+    
+    <style>
+        /* Matrix Decryption Effect - Refined */
+        .matrix-decrypt {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .matrix-decrypt.decrypting {
+            color: #00ff00;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+            animation: subtleGlitch 0.1s infinite;
+        }
+
+        @keyframes subtleGlitch {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-1px); }
+            50% { transform: translateX(1px); }
+            75% { transform: translateX(-0.5px); }
+        }
+
+        .matrix-decrypt.decrypted {
+            animation: revealPassword 0.6s ease forwards;
+        }
+
+        @keyframes revealPassword {
+            0% {
+                color: #00ff00;
+                text-shadow: 0 0 15px rgba(0, 255, 0, 0.8);
+                letter-spacing: 3px;
+            }
+            100% {
+                color: #fff;
+                text-shadow: none;
+                letter-spacing: 1px;
+            }
+        }
+
+        /* Matrix Rain Effect - Toned Down */
+        .matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0;
+            transition: opacity 1s;
+        }
+
+        .matrix-rain.active {
+            opacity: 0.08; /* Much more subtle */
+        }
+
+        .matrix-rain canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Decryption Status */
+        .decrypt-status {
+            text-align: center;
+            margin: 10px 0;
+            font-family: 'Courier New', monospace;
+            color: #00ff00;
+            font-size: 0.8rem;
+            text-shadow: 0 0 8px rgba(0, 255, 0, 0.6);
+            letter-spacing: 0.5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .decrypt-status.show {
+            opacity: 1;
+        }
+
+        .decrypt-status.complete {
+            color: #10b981;
+            animation: fadeOut 1s ease forwards;
+            animation-delay: 1s;
+        }
+
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+            }
+        }
+
+        /* Scan Line Effect (subtle) */
+        .scanning::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(0, 255, 0, 0.5), 
+                transparent
+            );
+            animation: scanLine 1.5s ease-in-out;
+        }
+
+        @keyframes scanLine {
+            0% { top: 0; opacity: 0; }
+            50% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .shared-value-container {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
+    <!-- Matrix Rain Background -->
+    <div class="matrix-rain" id="matrix-rain">
+        <canvas id="matrix-canvas"></canvas>
+    </div>
+
     <div class="bg-animation">
         <div class="floating-orb" style="width: 200px; height: 200px; top: 10%; left: 10%;"></div>
         <div class="floating-orb" style="width: 150px; height: 150px; top: 70%; left: 80%; animation-delay: -7s;"></div>
@@ -82,8 +204,11 @@
 
                     <div class="shared-password-field">
                         <label>Password</label>
+                        <div id="decrypt-status" class="decrypt-status" style="display: none;">
+                            <span id="decrypt-text">DECRYPTING...</span>
+                        </div>
                         <div class="shared-value-container">
-                            <input type="password" id="shared-password" readonly>
+                            <input type="password" id="shared-password" class="matrix-decrypt" readonly>
                             <button class="btn-copy-shared" onclick="copySharedField('shared-password')">
                                 <i class="fas fa-copy"></i>
                             </button>
@@ -154,12 +279,112 @@
     <script src="js/config.js"></script>
     <script src="js/firebase-init.js"></script>
     <script src="js/ui-utils.js"></script>
-    <script src="js/encryption.js"></script>
     <script src="js/interactive-background.js"></script>
 
     <script>
         let currentShareData = null;
         let shareToken = null;
+        let passwordRevealed = false; // Track if password is currently shown
+
+        // Matrix Rain Effect
+        function startMatrixRain() {
+            const canvas = document.getElementById('matrix-canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%^&*()';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+            
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#0F0';
+                ctx.font = fontSize + 'px monospace';
+                
+                for (let i = 0; i < drops.length; i++) {
+                    const char = chars[Math.floor(Math.random() * chars.length)];
+                    ctx.fillText(char, i * fontSize, drops[i] * fontSize);
+                    
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            
+            setInterval(draw, 33);
+            
+            // Resize handler
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        }
+
+        // Matrix Decryption Animation
+        function decryptPassword(inputElement, finalPassword) {
+            return new Promise((resolve) => {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+                const length = finalPassword.length;
+                let iteration = 0;
+                const maxIterations = 25;
+                
+                inputElement.classList.add('decrypting');
+                inputElement.type = 'text'; // Show the animation
+                
+                // Add scanning effect
+                const container = inputElement.closest('.shared-value-container');
+                if (container) {
+                    container.classList.add('scanning');
+                    setTimeout(() => container.classList.remove('scanning'), 1500);
+                }
+                
+                const interval = setInterval(() => {
+                    inputElement.value = finalPassword
+                        .split('')
+                        .map((char, index) => {
+                            if (iteration > index * (maxIterations / length)) {
+                                return char;
+                            }
+                            return chars[Math.floor(Math.random() * chars.length)];
+                        })
+                        .join('');
+                    
+                    iteration++;
+                    
+                    if (iteration >= maxIterations) {
+                        clearInterval(interval);
+                        inputElement.value = finalPassword;
+                        inputElement.classList.remove('decrypting');
+                        inputElement.classList.add('decrypted');
+                        
+                        // Keep as text (revealed) - don't hide
+                        // inputElement.type = 'password'; // REMOVED
+                        
+                        resolve();
+                    }
+                }, 40);
+            });
+        }
+
+        // Update decrypt status text
+        function updateDecryptStatus(text, complete = false) {
+            const statusDiv = document.getElementById('decrypt-status');
+            const statusText = document.getElementById('decrypt-text');
+            
+            statusDiv.style.display = 'block';
+            statusDiv.classList.add('show');
+            statusText.textContent = text;
+            
+            if (complete) {
+                statusDiv.classList.add('complete');
+            }
+        }
 
         document.addEventListener('DOMContentLoaded', async () => {
             const urlParams = new URLSearchParams(window.location.search);
@@ -169,6 +394,10 @@
                 showError('Invalid Link', 'No share token provided.');
                 return;
             }
+
+            // Start matrix rain (very subtle)
+            startMatrixRain();
+            document.getElementById('matrix-rain').classList.add('active');
 
             await loadSharedPassword();
         });
@@ -244,9 +473,22 @@
 
         async function displayPassword(shareData) {
             try {
-                // Decrypt password data
-                encryptionKey = shareToken.substring(0, 32);
-                const decryptedData = JSON.parse(decrypt(shareData.passwordData));
+                // Show decryption status
+                updateDecryptStatus('DECRYPTING...');
+                
+                // ⚠️ CRITICAL FIX: Decrypt with share token, NOT user's master password
+                const shareKey = shareToken.substring(0, 32);
+                
+                await new Promise(resolve => setTimeout(resolve, 500));
+                
+                const bytes = CryptoJS.AES.decrypt(shareData.passwordData, shareKey);
+                const decryptedJSON = bytes.toString(CryptoJS.enc.Utf8);
+                
+                if (!decryptedJSON) {
+                    throw new Error('Decryption failed - invalid key or corrupted data');
+                }
+                
+                const decryptedData = JSON.parse(decryptedJSON);
 
                 // Update view count
                 await firebase.firestore()
@@ -259,7 +501,11 @@
                 // Populate UI
                 document.getElementById('shared-site-name').textContent = decryptedData.siteName;
                 document.getElementById('shared-username').value = decryptedData.username;
-                document.getElementById('shared-password').value = decryptedData.password;
+                
+                // Store password for toggling
+                const passwordInput = document.getElementById('shared-password');
+                passwordInput.dataset.actualPassword = decryptedData.password;
+                passwordInput.value = '•'.repeat(decryptedData.password.length);
                 
                 if (decryptedData.url) {
                     document.getElementById('shared-url').value = decryptedData.url;
@@ -281,40 +527,82 @@
                 document.getElementById('code-required-state').style.display = 'none';
                 document.getElementById('password-display-state').style.display = 'block';
 
+                updateDecryptStatus('✓ SECURE CONNECTION ESTABLISHED', true);
+
             } catch (error) {
                 console.error('Error displaying password:', error);
-                showError('Decryption Error', 'Failed to decrypt password data.');
+                showError('Decryption Error', 'Failed to decrypt password data. The link may be corrupted or invalid.');
             }
         }
 
-        function toggleSharedPasswordVisibility() {
+        async function toggleSharedPasswordVisibility() {
             const input = document.getElementById('shared-password');
             const icon = document.getElementById('shared-eye-icon');
+            const actualPassword = input.dataset.actualPassword;
             
-            if (input.type === 'password') {
-                input.type = 'text';
+            if (!passwordRevealed) {
+                // Reveal with matrix effect
+                updateDecryptStatus('REVEALING PASSWORD...');
                 icon.classList.remove('fa-eye');
                 icon.classList.add('fa-eye-slash');
+                
+                await decryptPassword(input, actualPassword);
+                updateDecryptStatus('✓ PASSWORD REVEALED', true);
+                passwordRevealed = true;
             } else {
+                // Hide password
                 input.type = 'password';
+                input.value = '•'.repeat(actualPassword.length);
+                input.classList.remove('decrypted', 'decrypting');
                 icon.classList.remove('fa-eye-slash');
                 icon.classList.add('fa-eye');
+                passwordRevealed = false;
+                
+                // Clear status
+                document.getElementById('decrypt-status').classList.remove('show');
             }
         }
 
         function copySharedField(fieldId) {
             const input = document.getElementById(fieldId);
-            input.select();
-            navigator.clipboard.writeText(input.value).then(() => {
+            let textToCopy = input.value;
+            
+            // If it's the password field, copy the actual password
+            if (fieldId === 'shared-password' && input.dataset.actualPassword) {
+                textToCopy = input.dataset.actualPassword;
+            }
+            
+            navigator.clipboard.writeText(textToCopy).then(() => {
                 showToast('Copied to clipboard!', 'success');
             });
         }
 
         function showError(title, message) {
             document.getElementById('loading-state').style.display = 'none';
+            document.getElementById('matrix-rain').classList.remove('active');
             document.getElementById('error-title').textContent = title;
             document.getElementById('error-message').textContent = message;
             document.getElementById('error-state').style.display = 'block';
+        }
+
+        function showToast(message, type) {
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) existingToast.remove();
+            
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let icon = 'fa-check-circle';
+            if (type === 'error') icon = 'fa-exclamation-circle';
+            if (type === 'warning') icon = 'fa-exclamation-triangle';
+            
+            toast.innerHTML = `<i class="fas ${icon}"></i><span>${message}</span>`;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
         }
     </script>
 </body>
