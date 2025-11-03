@@ -98,19 +98,19 @@ function calculatePasswordStrength(password) {
 
     // Length check
     if (password.length <= 4) {
-        strength += 5;
+        strength -= 20;
     }
     else if (password.length <= 7){
-        strength += 10;
+        strength -= 10;
     }
     else if (password.length <= 10){
-        strength += 20;
+        strength += 5;
     }
     else if (password.length <= 15) {
-        strength += 30;
+        strength += 15;
     }
     else {
-        strength += 40;
+        strength += 25;
     }
 
     // Character variety checks
