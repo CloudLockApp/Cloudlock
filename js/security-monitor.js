@@ -98,10 +98,10 @@ function calculatePasswordStrength(password) {
 
     // Length check
     if (password.length <= 4) {
-        strength -= 20;
+        strength -= 80;
     }
     else if (password.length <= 7){
-        strength -= 10;
+        strength -= 30;
     }
     else if (password.length <= 10){
         strength += 5;
@@ -175,8 +175,7 @@ function calculatePasswordStrength(password) {
     const lower = password.toLowerCase();
     for (const w of commonPasswords) {
         if (lower.includes(w)) {
-            strength -= 100;
-            break; // no need to continue checking further
+            strength -= 85;
         }
     }
 
