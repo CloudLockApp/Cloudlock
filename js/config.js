@@ -1,8 +1,8 @@
 // Configuration File
-// Firebase and Gemini credentials
+// Firebase, OpenRouter, and HaveIBeenPwned credentials
 
 const CONFIG = {
-    // Firebase Configuration - UPDATED WITH NEW CREDENTIALS
+    // Firebase Configuration
     firebase: {
         apiKey: "AIzaSyDyHH0DXSEaxb_Ft-cmuGpaCQP8xSx105U",
         authDomain: "cloudlock-8a59b.firebaseapp.com",
@@ -12,8 +12,16 @@ const CONFIG = {
         appId: "1:723019842397:web:886db24af7ed5587351eb4"
     },
     
+    // OpenRouter AI Configuration
     openrouter: {
-        apiKey:  "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"
+        apiKey: "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"
+    },
+    
+    // HaveIBeenPwned Configuration
+    // Get your free API key at: https://haveibeenpwned.com/API/Key
+    hibp: {
+        apiKey: null, // Add your HIBP API key here (optional - only needed for email breach checking)
+        // Note: Password checking works without an API key using k-anonymity
     }
 };
 
