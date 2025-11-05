@@ -1,0 +1,331 @@
+/* CloudLock Extension Styles */
+
+.cloudlock-icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 999999;
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
+  transition: all 0.3s;
+}
+
+.cloudlock-icon:hover {
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.5);
+}
+
+.cloudlock-icon svg {
+  color: #fff;
+}
+
+.cloudlock-username-icon {
+  background: linear-gradient(135deg, #10b981, #059669);
+}
+
+.cloudlock-username-icon:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+}
+
+/* Password Menu */
+.cloudlock-menu {
+  position: absolute;
+  background: #1a1a2e;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 999999;
+  min-width: 300px;
+  max-height: 400px;
+  overflow-y: auto;
+  backdrop-filter: blur(20px);
+}
+
+.cloudlock-menu-header {
+  padding: 15px;
+  background: rgba(124, 58, 237, 0.1);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.2);
+  font-weight: 600;
+  color: #a78bfa;
+  font-size: 0.9rem;
+}
+
+.cloudlock-menu-section {
+  padding: 10px 15px;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  background: rgba(15, 15, 35, 0.6);
+  border-top: 1px solid rgba(124, 58, 237, 0.1);
+}
+
+.cloudlock-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 15px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cloudlock-menu-item:hover {
+  background: rgba(124, 58, 237, 0.15);
+}
+
+.cloudlock-menu-item-icon {
+  width: 32px;
+  height: 32px;
+  background: rgba(124, 58, 237, 0.2);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.cloudlock-menu-item-icon svg {
+  color: #a78bfa;
+}
+
+.cloudlock-menu-item-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.cloudlock-menu-item-title {
+  font-weight: 600;
+  color: #fff;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cloudlock-menu-item-subtitle {
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.6);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cloudlock-menu-actions {
+  display: flex;
+  gap: 8px;
+  padding: 12px 15px;
+  background: rgba(15, 15, 35, 0.6);
+  border-top: 1px solid rgba(124, 58, 237, 0.2);
+}
+
+.cloudlock-menu-btn-small {
+  flex: 1;
+  padding: 8px 12px;
+  background: rgba(124, 58, 237, 0.2);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 8px;
+  color: #a78bfa;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.cloudlock-menu-btn-small:hover {
+  background: rgba(124, 58, 237, 0.3);
+  border-color: #a78bfa;
+  transform: translateY(-1px);
+}
+
+.cloudlock-menu-loading {
+  padding: 30px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.cloudlock-menu-empty,
+.cloudlock-menu-error {
+  padding: 30px;
+  text-align: center;
+}
+
+.cloudlock-menu-empty p,
+.cloudlock-menu-error p {
+  color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 15px;
+}
+
+.cloudlock-menu-btn {
+  padding: 10px 20px;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cloudlock-menu-btn:hover {
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+/* Save Prompt */
+.cloudlock-save-prompt {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #1a1a2e;
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 12px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  z-index: 999999;
+  width: 350px;
+  padding: 20px;
+  animation: slideInRight 0.3s ease;
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(400px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.cloudlock-save-prompt-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: #fff;
+  font-weight: 600;
+}
+
+.cloudlock-save-prompt-header svg {
+  color: #a78bfa;
+}
+
+.cloudlock-save-prompt-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 0;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.cloudlock-save-prompt-close:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.cloudlock-save-input {
+  width: 100%;
+  padding: 10px;
+  background: rgba(15, 15, 35, 0.6);
+  border: 1px solid rgba(124, 58, 237, 0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  transition: all 0.3s;
+}
+
+.cloudlock-save-input:focus {
+  outline: none;
+  border-color: #7c3aed;
+  background: rgba(15, 15, 35, 0.8);
+}
+
+.cloudlock-save-prompt-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.cloudlock-save-prompt-btn {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.cloudlock-save-cancel {
+  background: rgba(255, 255, 255, 0.1);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.cloudlock-save-cancel:hover {
+  background: rgba(255, 255, 255, 0.15);
+  color: #fff;
+}
+
+.cloudlock-save-confirm {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  color: #fff;
+}
+
+.cloudlock-save-confirm:hover {
+  background: linear-gradient(135deg, #6d28d9, #8b5cf6);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+}
+
+.cloudlock-save-prompt-success {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 20px;
+  color: #10b981;
+  font-weight: 600;
+}
+
+.cloudlock-save-prompt-success svg {
+  color: #10b981;
+}
+
+/* Scrollbar */
+.cloudlock-menu::-webkit-scrollbar {
+  width: 8px;
+}
+
+.cloudlock-menu::-webkit-scrollbar-track {
+  background: rgba(15, 15, 35, 0.4);
+}
+
+.cloudlock-menu::-webkit-scrollbar-thumb {
+  background: rgba(124, 58, 237, 0.4);
+  border-radius: 4px;
+}
+
+.cloudlock-menu::-webkit-scrollbar-thumb:hover {
+  background: rgba(124, 58, 237, 0.6);
+}
