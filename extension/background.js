@@ -1,7 +1,22 @@
-// Background Service Worker
+// Background Service Worker - CloudLock Extension
+// Using Firebase REST API and local CryptoJS for encryption compatibility
+
+// Import local CryptoJS implementation
+importScripts('crypto-js-simple.js');
+
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDyHH0DXSEaxb_Ft-cmuGpaCQP8xSx105U",
+  authDomain: "cloudlock-8a59b.firebaseapp.com",
+  projectId: "cloudlock-8a59b",
+  storageBucket: "cloudlock-8a59b.firebasestorage.app",
+  messagingSenderId: "723019842397",
+  appId: "1:723019842397:web:886db24af7ed5587351eb4"
+};
+
 let authenticatedUser = null;
 let cachedPasswords = [];
 let sessionKey = null;
+let authToken = null;
 
 // Initialize extension
 chrome.runtime.onInstalled.addListener(() => {
@@ -87,28 +102,55 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
   }
 });
 
-// Authentication handler
+// Authentication handler using Firebase REST API
 async function handleAuthentication(credentials) {
   try {
-    // Store credentials in Chrome storage (encrypted)
-    const encrypted = await encryptData(credentials);
+    // Use Firebase REST API for authentication
+    const response = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_CONFIG.apiKey}`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password,
+          returnSecureToken: true
+        })
+      }
+    );
+
+    if (!response.ok) {
+      const error = await response.json();
+      throw new Error(error.error.message || 'Authentication failed');
+    }
+
+    const data = await response.json();
+    authToken = data.idToken;
+    
+    // Store credentials in Chrome storage
     await chrome.storage.local.set({ 
-      cloudlock_session: encrypted,
-      cloudlock_user: credentials.email 
+      cloudlock_user: credentials.email,
+      cloudlock_uid: data.localId,
+      cloudlock_token: authToken
     });
     
     authenticatedUser = {
       email: credentials.email,
+      uid: data.localId,
       timestamp: Date.now()
     };
     
+    // Store master password for CryptoJS decryption (same as web app)
     sessionKey = credentials.password;
     
-    // Fetch passwords
+    // Fetch passwords from Firestore
     await syncPasswords();
     
     return authenticatedUser;
   } catch (error) {
+    console.error('Authentication failed:', error);
     throw new Error('Authentication failed: ' + error.message);
   }
 }
@@ -124,45 +166,200 @@ async function getPasswords() {
     return cachedPasswords;
   }
   
-  // Sync from storage
+  // Sync from Firestore
   await syncPasswords();
   return cachedPasswords;
 }
 
-// Sync passwords from CloudLock web app
+// Sync passwords from Firestore using REST API
 async function syncPasswords() {
   try {
-    const stored = await chrome.storage.local.get('cloudlock_passwords');
-    if (stored.cloudlock_passwords) {
-      cachedPasswords = stored.cloudlock_passwords;
+    if (!authenticatedUser || !authenticatedUser.uid) {
+      console.error('No authenticated user');
+      return;
+    }
+    
+    if (!authToken) {
+      // Try to get token from storage
+      const stored = await chrome.storage.local.get('cloudlock_token');
+      if (stored.cloudlock_token) {
+        authToken = stored.cloudlock_token;
+      } else {
+        throw new Error('No auth token available');
+      }
+    }
+    
+    // Use structured query to filter by userId
+    const queryBody = {
+      structuredQuery: {
+        from: [{ collectionId: 'passwords' }],
+        where: {
+          fieldFilter: {
+            field: { fieldPath: 'userId' },
+            op: 'EQUAL',
+            value: { stringValue: authenticatedUser.uid }
+          }
+        }
+      }
+    };
+    
+    // Query Firestore using REST API with structured query
+    const response = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents:runQuery`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(queryBody)
+      }
+    );
+
+    if (response.ok) {
+      const results = await response.json();
+      cachedPasswords = [];
+      
+      if (results && Array.isArray(results)) {
+        for (const result of results) {
+          if (!result.document) continue;
+          
+          const doc = result.document;
+          const fields = doc.fields;
+          
+          const passwordData = {
+            id: doc.name.split('/').pop(),
+            siteName: fields.siteName?.stringValue || '',
+            url: fields.url?.stringValue || '',
+            username: fields.username?.stringValue || '',
+            password: fields.password?.stringValue || '',
+            notes: fields.notes?.stringValue || '',
+            createdAt: fields.createdAt?.timestampValue || Date.now(),
+            updatedAt: fields.updatedAt?.timestampValue || Date.now()
+          };
+          
+          // Decrypt password using CryptoJS AES (same as web app)
+          if (passwordData.password && sessionKey) {
+            try {
+              const bytes = CryptoJS.AES.decrypt(passwordData.password, sessionKey);
+              const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+              if (decrypted) {
+                passwordData.password = decrypted;
+              }
+            } catch (e) {
+              console.error('Error decrypting password:', e);
+            }
+          }
+          
+          // Decrypt notes using CryptoJS AES
+          if (passwordData.notes && sessionKey) {
+            try {
+              const bytes = CryptoJS.AES.decrypt(passwordData.notes, sessionKey);
+              const decrypted = bytes.toString(CryptoJS.enc.Utf8);
+              if (decrypted) {
+                passwordData.notes = decrypted;
+              }
+            } catch (e) {
+              console.error('Error decrypting notes:', e);
+            }
+          }
+          
+          cachedPasswords.push(passwordData);
+        }
+      }
+      
+      // Cache in local storage
+      await chrome.storage.local.set({ 
+        cloudlock_passwords: cachedPasswords 
+      });
+      
+      console.log(`✅ Synced ${cachedPasswords.length} passwords from Firestore`);
+    } else {
+      const errorText = await response.text();
+      console.error('Firestore fetch error:', errorText);
+      throw new Error('Failed to fetch passwords');
     }
   } catch (error) {
     console.error('Error syncing passwords:', error);
+    
+    // Fallback to local storage if Firestore fails
+    try {
+      const stored = await chrome.storage.local.get('cloudlock_passwords');
+      if (stored.cloudlock_passwords) {
+        cachedPasswords = stored.cloudlock_passwords;
+      }
+    } catch (storageError) {
+      console.error('Error loading from storage:', storageError);
+    }
   }
 }
 
-// Save password
+// Save password to Firestore using REST API
 async function savePassword(data) {
   if (!authenticatedUser) {
     throw new Error('Not authenticated');
   }
   
-  const password = {
-    id: generateId(),
-    siteName: data.siteName,
-    url: data.url,
-    username: data.username,
-    password: await encryptData(data.password),
-    createdAt: Date.now()
-  };
-  
-  cachedPasswords.push(password);
-  
-  await chrome.storage.local.set({ 
-    cloudlock_passwords: cachedPasswords 
-  });
-  
-  return password;
+  try {
+    // Encrypt password using CryptoJS AES (same as web app)
+    const encryptedPassword = sessionKey ? CryptoJS.AES.encrypt(data.password, sessionKey).toString() : data.password;
+    const encryptedNotes = (data.notes && sessionKey) ? CryptoJS.AES.encrypt(data.notes, sessionKey).toString() : '';
+    
+    const passwordData = {
+      fields: {
+        userId: { stringValue: authenticatedUser.uid },
+        siteName: { stringValue: data.siteName },
+        url: { stringValue: data.url || '' },
+        username: { stringValue: data.username },
+        password: { stringValue: encryptedPassword },
+        notes: { stringValue: encryptedNotes },
+        createdAt: { timestampValue: new Date().toISOString() },
+        updatedAt: { timestampValue: new Date().toISOString() }
+      }
+    };
+    
+    // Save to Firestore using REST API
+    const response = await fetch(
+      `https://firestore.googleapis.com/v1/projects/${FIREBASE_CONFIG.projectId}/databases/(default)/documents/passwords`,
+      {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${authToken}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(passwordData)
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error('Failed to save password to Firestore');
+    }
+
+    const result = await response.json();
+    
+    const savedPassword = {
+      id: result.name.split('/').pop(),
+      siteName: data.siteName,
+      url: data.url,
+      username: data.username,
+      password: data.password, // Store decrypted in cache
+      notes: data.notes || '',
+      createdAt: Date.now()
+    };
+    
+    cachedPasswords.push(savedPassword);
+    
+    // Update local cache
+    await chrome.storage.local.set({ 
+      cloudlock_passwords: cachedPasswords 
+    });
+    
+    console.log('✅ Password saved to Firestore');
+    return savedPassword;
+  } catch (error) {
+    console.error('Error saving password:', error);
+    throw new Error('Failed to save password: ' + error.message);
+  }
 }
 
 // Logout
@@ -170,10 +367,12 @@ async function logout() {
   authenticatedUser = null;
   cachedPasswords = [];
   sessionKey = null;
+  authToken = null;
   
   await chrome.storage.local.remove([
-    'cloudlock_session',
     'cloudlock_user',
+    'cloudlock_uid',
+    'cloudlock_token',
     'cloudlock_passwords'
   ]);
 }
@@ -207,51 +406,13 @@ function generateSecurePassword(options = {}) {
   return password;
 }
 
-// Simple encryption (in production, use Web Crypto API properly)
-async function encryptData(data) {
-  if (!sessionKey) return data;
-  
-  // Simple XOR encryption for demo (use proper encryption in production)
-  const text = typeof data === 'string' ? data : JSON.stringify(data);
-  let encrypted = '';
-  
-  for (let i = 0; i < text.length; i++) {
-    encrypted += String.fromCharCode(
-      text.charCodeAt(i) ^ sessionKey.charCodeAt(i % sessionKey.length)
-    );
-  }
-  
-  return btoa(encrypted);
-}
-
-// Simple decryption
-async function decryptData(encrypted) {
-  if (!sessionKey) return encrypted;
-  
-  const text = atob(encrypted);
-  let decrypted = '';
-  
-  for (let i = 0; i < text.length; i++) {
-    decrypted += String.fromCharCode(
-      text.charCodeAt(i) ^ sessionKey.charCodeAt(i % sessionKey.length)
-    );
-  }
-  
-  return decrypted;
-}
-
-// Generate unique ID
-function generateId() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2);
-}
-
 // Auto-lock after 30 minutes
 setInterval(() => {
   if (authenticatedUser) {
     const elapsed = Date.now() - authenticatedUser.timestamp;
     if (elapsed > 30 * 60 * 1000) {
       logout();
-      chrome.runtime.sendMessage({ action: 'sessionExpired' });
+      chrome.runtime.sendMessage({ action: 'sessionExpired' }).catch(() => {});
     }
   }
 }, 60000);
