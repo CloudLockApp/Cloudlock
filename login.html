@@ -113,10 +113,9 @@
           </form>
 
           <div class="auth-footer">
-            <a href="reset.html" onclick="showForgotPassword(); return false;">
-              <i class="fas fa-question-circle"></i> Forgot Password?
-            </a>
+            <a href="reset.html">Forgot password?</a>
           </div>
+
         </div>
 
         <!-- Step 2: 2FA Verification -->
@@ -597,87 +596,6 @@
               <span></span><span></span><span></span>
             </div>
           </div>
-        </div>
-
-      </div>
-
-      <!-- ========================================== -->
-      <!-- FORGOT PASSWORD FLOW -->
-      <!-- ========================================== -->
-      
-      <div id="forgot-password-flow" class="auth-flow" style="display: none;">
-        
-        <!-- Step 1: Enter Email -->
-        <div id="forgot-step-1" class="auth-step-content active">
-          <div class="auth-header">
-            <h2><i class="fas fa-unlock-alt"></i> Reset Password</h2>
-            <p>Enter your email to begin recovery</p>
-          </div>
-
-          <form onsubmit="handleForgotPasswordStep1(event)">
-            <div class="form-group">
-              <label for="forgot-email">
-                <i class="fas fa-envelope"></i> Email Address
-              </label>
-              <input type="email" id="forgot-email" required placeholder="your.email@example.com" />
-            </div>
-
-            <button type="submit" class="btn btn-full btn-primary">
-              <i class="fas fa-paper-plane"></i> Send Recovery Email
-            </button>
-          </form>
-
-          <div class="auth-footer">
-            <a href="#" onclick="hideAllFlows(); showFlow('login'); return false;">
-              <i class="fas fa-arrow-left"></i> Back to login
-            </a>
-          </div>
-        </div>
-
-        <!-- Step 2: Security Questions -->
-        <div id="forgot-step-2" class="auth-step-content">
-          <div class="auth-header">
-            <h2><i class="fas fa-question-circle"></i> Answer Security Questions</h2>
-            <p>Verify your identity</p>
-          </div>
-
-          <form onsubmit="verifySecurityQuestions(event)">
-            <div id="recovery-questions">
-              <!-- Dynamically loaded -->
-            </div>
-
-            <button type="submit" class="btn btn-full btn-primary">
-              <i class="fas fa-check"></i> Verify Answers
-            </button>
-          </form>
-        </div>
-
-        <!-- Step 3: Reset Password -->
-        <div id="forgot-step-3" class="auth-step-content">
-          <div class="auth-header">
-            <h2><i class="fas fa-key"></i> Create New Password</h2>
-            <p>Choose a strong new password</p>
-          </div>
-
-          <form onsubmit="resetPassword(event)">
-            <div class="form-group">
-              <label for="new-password">
-                <i class="fas fa-key"></i> New Password
-              </label>
-              <input type="password" id="new-password" required placeholder="Enter new password" />
-            </div>
-
-            <div class="form-group">
-              <label for="confirm-new-password">
-                <i class="fas fa-check-double"></i> Confirm Password
-              </label>
-              <input type="password" id="confirm-new-password" required placeholder="Re-enter new password" />
-            </div>
-
-            <button type="submit" class="btn btn-full btn-primary">
-              <i class="fas fa-check"></i> Reset Password
-            </button>
-          </form>
         </div>
 
       </div>
