@@ -33,25 +33,23 @@
 
       <div id="forgot-password-flow" class="auth-flow">
 
-        <!-- Step 1 -->
+        <!-- Email step -->
         <div id="forgot-step-1" class="auth-step-content active">
           <div class="auth-header">
             <h2><i class="fas fa-unlock-alt"></i> Reset Password</h2>
-            <p>Enter your email to begin recovery</p>
+            <p>Enter your email to receive a reset link</p>
           </div>
 
-          <form onsubmit="handleForgotPasswordStep1(event)">
-            <div class="form-group">
-              <label for="forgot-email">
-                <i class="fas fa-envelope"></i> Email Address
-              </label>
-              <input type="email" id="forgot-email" required placeholder="your.email@example.com" />
-            </div>
+          <div class="form-group">
+            <label for="reset-email">
+              <i class="fas fa-envelope"></i> Email Address
+            </label>
+            <input type="email" id="reset-email" required placeholder="your.email@example.com" />
+          </div>
 
-            <button type="submit" class="btn btn-full btn-primary">
-              <i class="fas fa-paper-plane"></i> Send Recovery Email
-            </button>
-          </form>
+          <button class="btn btn-full btn-primary" id="fetch-questions-btn">
+            <i class="fas fa-paper-plane"></i> Send Reset Email
+          </button>
 
           <div class="auth-footer">
             <a href="login.html">
@@ -60,66 +58,23 @@
           </div>
         </div>
 
-        <!-- Step 2 -->
-        <div id="forgot-step-2" class="auth-step-content">
-          <div class="auth-header">
-            <h2><i class="fas fa-question-circle"></i> Answer Security Questions</h2>
-            <p>Verify your identity</p>
-          </div>
-
-          <form onsubmit="verifySecurityQuestions(event)">
-            <div id="recovery-questions"></div>
-            <button type="submit" class="btn btn-full btn-primary">
-              <i class="fas fa-check"></i> Verify Answers
-            </button>
-          </form>
-        </div>
-
-        <!-- Step 3 -->
-        <div id="forgot-step-3" class="auth-step-content">
-          <div class="auth-header">
-            <h2><i class="fas fa-key"></i> Create New Password</h2>
-            <p>Choose a strong new password</p>
-          </div>
-
-          <form onsubmit="resetPassword(event)">
-            <div class="form-group">
-              <label for="new-password">
-                <i class="fas fa-key"></i> New Password
-              </label>
-              <input type="password" id="new-password" required placeholder="Enter new password" />
-            </div>
-
-            <div class="form-group">
-              <label for="confirm-new-password">
-                <i class="fas fa-check-double"></i> Confirm Password
-              </label>
-              <input type="password" id="confirm-new-password" required placeholder="Re-enter new password" />
-            </div>
-
-            <button type="submit" class="btn btn-full btn-primary">
-              <i class="fas fa-check"></i> Reset Password
-            </button>
-          </form>
-        </div>
-
       </div>
 
     </div>
   </div>
 
+  <!-- Firebase -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-functions-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
   <script src="js/config.js"></script>
   <script src="js/firebase-init.js"></script>
+
+  <!-- working reset email logic -->
+  <script src="js/reset.js"></script>
+
+  <!-- effects -->
   <script src="js/ui-utils.js"></script>
   <script src="js/encryption.js"></script>
   <script src="js/interactive-background.js"></script>
-  <script src="js/enhanced-auth.js"></script>
 </body>
 </html>
