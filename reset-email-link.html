@@ -3,20 +3,107 @@
 <head>
 <meta name=viewport content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script src="https://cloudlock-8a59b.firebaseapp.com/__/auth/experiments.js"></script>
-<script src="https://cloudlock-8a59b.firebaseapp.com/__/auth/action.js"></script>
 
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
 
 <script src="js/config.js"></script>
 <script src="js/firebase-init.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-sha256/0.9.0/sha256.min.js"></script>
 
-<script type="text/javascript">
-fireauth.oob.OobHandler.initialize('#actionElement');
-</script>
 </head>
 <body>
-<div id="actionElement"></div>
+  <h2>Reset Your Password</h2>
+  <div id="message"></div>
+
+  <div id="security-questions-container"></div>
+
+  <div id="new-password-container" style="display:none;">
+    <input type="password" id="new-password" placeholder="Enter new password" />
+    <button id="set-password-btn">Set New Password</button>
+  </div>
+
+  <script>
+  (async function() {
+    const params = new URLSearchParams(window.location.search);
+    const oobCode = params.get("oobCode");
+    const mode = params.get("mode");
+
+    if (!oobCode || mode !== "resetPassword") {
+      document.getElementById("message").innerText = "Invalid or expired link.";
+      return;
+    }
+
+    let email;
+    try {
+      email = await firebase.auth().verifyPasswordResetCode(oobCode);
+    } catch (err) {
+      console.error(err);
+      document.getElementById("message").innerText = "Invalid or expired link.";
+      return;
+    }
+
+    // Fetch user document
+    const userSnapshot = await firebase.firestore()
+      .collection("users")
+      .where("email", "==", email)
+      .limit(1)
+      .get();
+
+    if (userSnapshot.empty) {
+      document.getElementById("message").innerText = "No user found for this email.";
+      return;
+    }
+
+    const userDoc = userSnapshot.docs[0].data();
+    const questions = [
+      userDoc.securityQuestions.question1,
+      userDoc.securityQuestions.question2,
+      userDoc.securityQuestions.question3
+    ];
+
+    const container = document.getElementById("security-questions-container");
+    container.innerHTML = "<h3>Answer your security questions</h3>";
+
+    questions.forEach((q, idx) => {
+      container.innerHTML += `
+        <label>${q.question}</label><br/>
+        <input type="text" id="answer-${idx}" placeholder="Your answer" /><br/><br/>
+      `;
+    });
+
+    const verifyBtn = document.createElement("button");
+    verifyBtn.innerText = "Verify Answers";
+    container.appendChild(verifyBtn);
+
+    verifyBtn.addEventListener("click", () => {
+      const answers = questions.map((q, i) => document.getElementById(`answer-${i}`).value.trim());
+      const allMatch = answers.every((ans, i) => sha256(ans) === questions[i].answer);
+
+      if (allMatch) {
+        container.style.display = "none";
+        document.getElementById("new-password-container").style.display = "block";
+      } else {
+        alert("One or more answers are incorrect.");
+      }
+    });
+
+    // Set new password
+    document.getElementById("set-password-btn").addEventListener("click", async () => {
+      const newPassword = document.getElementById("new-password").value.trim();
+      if (!newPassword) return alert("Please enter a new password");
+
+      try {
+        await firebase.auth().confirmPasswordReset(oobCode, newPassword);
+        alert("Password successfully reset!");
+        window.location.href = "login.html";
+      } catch (err) {
+        console.error(err);
+        alert("Failed to reset password.");
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
