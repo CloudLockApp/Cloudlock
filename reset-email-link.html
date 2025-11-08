@@ -1,13 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <title>Reset Password</title>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
-  <script src="reset.js"></script>
+<meta name=viewport content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<script src="https://cloudlock-8a59b.firebaseapp.com/__/auth/experiments.js"></script>
+<script src="https://cloudlock-8a59b.firebaseapp.com/__/auth/action.js"></script>
+
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+
+<script src="js/config.js"></script>
+<script src="js/firebase-init.js"></script>
+
+<script type="text/javascript">
+fireauth.oob.OobHandler.initialize('#actionElement');
+</script>
 </head>
 <body>
-  <div id="root"></div>
+<div id="actionElement"></div>
 </body>
 </html>
