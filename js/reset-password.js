@@ -8,16 +8,22 @@ async function initReset() {
     resetEmail = await firebase.auth().verifyPasswordResetCode(oobCode);
 
     // Fetch user's security questions
-    const userDoc = await firebase.firestore()
+    const userQuery = await firebase.firestore()
       .collection("users")
       .where("email", "==", resetEmail)
       .limit(1)
       .get();
 
-    if (userDoc.empty) throw new Error("User not found");
+    if (userQuery.empty) throw new Error("User not found");
 
-    const data = userDoc.docs[0].data();
-    securityQuestions = data.securityQuestions || [];
+    const data = userQuery.docs[0].data();
+   
+    securityQuestions = Object.values(data.securityQuestions || {});
+
+    if (securityQuestions.length === 0) {
+        alert("No security questions found for this account. Cannot proceed with reset.");
+        return;
+    }
 
     const container = document.getElementById("questions-container");
 
@@ -29,6 +35,7 @@ async function initReset() {
     `).join("");
 
   } catch (err) {
+    console.error("Reset initialization error:", err);
     alert("Invalid or expired reset link.");
     window.location.href = "reset.html";
   }
@@ -37,9 +44,12 @@ async function initReset() {
 document.getElementById("submit-answers-btn").onclick = async () => {
   for (let i = 0; i < securityQuestions.length; i++) {
     const input = document.getElementById(`answer-${i}`).value.trim().toLowerCase();
-    const correct = securityQuestions[i].answer.toLowerCase();
+    const correctHash = securityQuestions[i].answer;
 
-    if (input !== correct) {
+    // Hash the user's input to compare with the stored hash
+    const hashedInput = CryptoJS.SHA256(input).toString();
+
+    if (hashedInput !== correctHash) {
       alert("Incorrect security answer");
       return;
     }
@@ -54,6 +64,11 @@ document.getElementById("reset-password-btn").onclick = async () => {
   const newPass = document.getElementById("new-password").value;
   const confirmPass = document.getElementById("confirm-password").value;
 
+  if (newPass.length < 8) {
+      alert("Password must be at least 8 characters long.");
+      return;
+  }
+
   if (newPass !== confirmPass) {
     alert("Passwords do not match");
     return;
@@ -61,7 +76,7 @@ document.getElementById("reset-password-btn").onclick = async () => {
 
   try {
     await firebase.auth().confirmPasswordReset(oobCode, newPass);
-    alert("Password reset successfully 🔐");
+    alert("Password reset successfully");
     window.location.href = "login.html";
   } catch (err) {
     alert("Failed to reset password.");
