@@ -27,12 +27,36 @@ async function initReset() {
 
     const container = document.getElementById("questions-container");
 
-    container.innerHTML = securityQuestions.map((q,i) => `
+    const questionTexts = {
+      // Group 1
+      pet: "What was the name of your first pet?",
+      city: "In what city were you born?",
+      school: "What is the name of your elementary school?",
+      car: "What was the make of your first car?",
+      food: "What is your favorite food?",
+      teacher: "What was your favorite teacher's name?",
+      // Group 2
+      maiden: "What is your mother's maiden name?",
+      street: "What street did you grow up on?",
+      job: "What was your first job?",
+      movie: "What is your favorite movie?",
+      book: "What is your favorite book?",
+      vacation: "Where did you go on your first vacation?",
+      // Group 3
+      nickname: "What was your childhood nickname?",
+      friend: "What is your best friend's name?",
+      sport: "What is your favorite sport?",
+      sibling: "What is your oldest sibling's name?",
+      color: "What is your favorite color?",
+      hospital: "In what hospital were you born?"
+    };
+    
+    container.innerHTML = securityQuestions.map((q, i) => `
       <div class="security-question">
-        <label>${q.question}</label>
+        <label>${questionTexts[q.question] || q.question}</label>
         <input type="text" id="answer-${i}" placeholder="Your Answer">
       </div>
-    `).join("");
+`    ).join("");
 
   } catch (err) {
     console.error("Reset initialization error:", err);
