@@ -1,7 +1,15 @@
 // Interactive Background - Matrix-style Code Rain Effect - INSTANT LOAD VERSION
 
 function createInteractiveBackground() {
-    const bgAnimation = document.querySelector('.bg-animation');
+    const bgAnimation = document.querySelector('.bg-animation') || 
+                       document.getElementById('interactive-background-container') || 
+                       document.body;
+    
+    // Add a check to prevent errors
+    if (!bgAnimation) {
+        console.warn('Background container not found');
+        return;
+    }
     
     // Code snippets for the matrix effect
     const codeSnippets = [
