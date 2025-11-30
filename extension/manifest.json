@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "CloudLock Password Manager",
-  "version": "1.0.0",
-  "description": "Secure password manager with AI-powered insights",
+  "version": "1.1.0",
+  "description": "Secure password manager with AI-powered insights and breach detection",
   "permissions": [
     "storage",
     "contextMenus",
@@ -20,7 +20,7 @@
   "content_scripts": [
     {
       "matches": ["<all_urls>"],
-      "js": ["content.js"],
+      "js": ["content.js", "extension-enhancements.js"],
       "css": ["content.css"],
       "run_at": "document_idle"
     }
@@ -48,5 +48,22 @@
       "resources": ["injected.js", "firebase-config.js"],
       "matches": ["<all_urls>"]
     }
-  ]
+  ],
+  "options_page": "extension-settings.html",
+  "commands": {
+    "fill-password": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+L",
+        "mac": "Command+Shift+L"
+      },
+      "description": "Fill password from CloudLock"
+    },
+    "generate-password": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+G",
+        "mac": "Command+Shift+G"
+      },
+      "description": "Generate secure password"
+    }
+  }
 }

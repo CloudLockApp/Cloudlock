@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CloudLock Settings</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: linear-gradient(135deg, #1a1a2e 0%, #0f0f23 100%);
+      color: #fff;
+      padding: 20px;
+      min-height: 100vh;
+    }
+
+    .settings-container {
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .settings-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .settings-header h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #fff, #a78bfa);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .settings-header p {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.9rem;
+    }
+
+    .settings-section {
+      background: rgba(15, 15, 35, 0.6);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 12px;
+      padding: 25px;
+      margin-bottom: 20px;
+    }
+
+    .settings-section h2 {
+      font-size: 1.3rem;
+      margin-bottom: 20px;
+      color: #a78bfa;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .setting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .setting-item:last-child {
+      border-bottom: none;
+    }
+
+    .setting-info {
+      flex: 1;
+    }
+
+    .setting-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #fff;
+    }
+
+    .setting-description {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+
+    /* Toggle Switch */
+    .toggle-switch {
+      position: relative;
+      width: 50px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: rgba(255, 255, 255, 0.1);
+      transition: 0.4s;
+      border-radius: 26px;
+    }
+
+    .toggle-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: 0.4s;
+      border-radius: 50%;
+    }
+
+    input:checked + .toggle-slider {
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+    }
+
+    input:checked + .toggle-slider:before {
+      transform: translateX(24px);
+    }
+
+    /* Select Dropdown */
+    .setting-select {
+      padding: 8px 12px;
+      background: rgba(15, 15, 35, 0.6);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 0.9rem;
+      cursor: pointer;
+      min-width: 120px;
+    }
+
+    .setting-select:focus {
+      outline: none;
+      border-color: #7c3aed;
+    }
+
+    /* Action Buttons */
+    .settings-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 30px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px 20px;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+    }
+
+    .btn-secondary {
+      background: rgba(255, 255, 255, 0.1);
+      color: rgba(255, 255, 255, 0.7);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+    }
+
+    .btn-danger {
+      background: rgba(239, 68, 68, 0.2);
+      color: #ef4444;
+      border: 1px solid rgba(239, 68, 68, 0.3);
+    }
+
+    .btn-danger:hover {
+      background: rgba(239, 68, 68, 0.3);
+    }
+
+    /* Status Message */
+    .status-message {
+      padding: 12px 20px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      align-items: center;
+      gap: 10px;
+      animation: slideIn 0.3s ease;
+    }
+
+    .status-message.success {
+      background: rgba(16, 185, 129, 0.2);
+      border: 1px solid rgba(16, 185, 129, 0.3);
+      color: #10b981;
+    }
+
+    .status-message.error {
+      background: rgba(239, 68, 68, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: #ef4444;
+    }
+
+    @keyframes slideIn {
+      from {
+        transform: translateY(-20px);
+        opacity: 0;
+      }
+      to {
+        transform: translateY(0);
+        opacity: 1;
+      }
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 20px;
+    }
+
+    .stat-card {
+      background: rgba(124, 58, 237, 0.1);
+      border: 1px solid rgba(124, 58, 237, 0.3);
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: 700;
+      color: #a78bfa;
+      margin-bottom: 5px;
+    }
+
+    .stat-label {
+      font-size: 0.85rem;
+      color: rgba(255, 255, 255, 0.6);
+    }
+  </style>
+</head>
+<body>
+  <div class="settings-container">
+    <div class="settings-header">
+      <h1>⚙️ CloudLock Settings</h1>
+      <p>Customize your password manager experience</p>
+    </div>
+
+    <div id="status-message" class="status-message"></div>
+
+    <!-- Statistics -->
+    <div class="settings-section">
+      <h2>📊 Statistics</h2>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-number" id="total-passwords">0</div>
+          <div class="stat-label">Total Passwords</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="sites-autofilled">0</div>
+          <div class="stat-label">Auto-Fills Today</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-number" id="passwords-generated">0</div>
+          <div class="stat-label">Generated</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Auto-Fill Settings -->
+    <div class="settings-section">
+      <h2>🔐 Auto-Fill</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Enable Auto-Fill</div>
+          <div class="setting-description">Automatically detect and offer to fill saved credentials</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoFill" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Auto-Fill on Page Load</div>
+          <div class="setting-description">Show prompt to fill credentials when page loads</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="autoFillOnLoad" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="settings-section">
+      <h2>🛡️ Security</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Breach Detection</div>
+          <div class="setting-description">Check passwords against known data breaches</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="breachCheck" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Password Strength Indicator</div>
+          <div class="setting-description">Show strength bars when typing passwords</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="strengthIndicator" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Auto-Lock Timer</div>
+          <div class="setting-description">Automatically lock after inactivity</div>
+        </div>
+        <select class="setting-select" id="autoLockMinutes">
+          <option value="5">5 minutes</option>
+          <option value="15">15 minutes</option>
+          <option value="30" selected>30 minutes</option>
+          <option value="60">1 hour</option>
+          <option value="-1">Never</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- UI Settings -->
+    <div class="settings-section">
+      <h2>🎨 Interface</h2>
+      
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Keyboard Shortcuts</div>
+          <div class="setting-description">Enable Ctrl+Shift+L and Ctrl+Shift+G shortcuts</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="shortcuts" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Passwordless Recommendations</div>
+          <div class="setting-description">Suggest passwordless login when available</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="passwordlessRecommendations" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Show CloudLock Icons</div>
+          <div class="setting-description">Display icons next to password fields</div>
+        </div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="showIcons" checked>
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="settings-actions">
+      <button class="btn btn-primary" id="save-btn">
+        <i class="fas fa-save"></i>
+        Save Settings
+      </button>
+      <button class="btn btn-secondary" id="reset-btn">
+        <i class="fas fa-undo"></i>
+        Reset to Defaults
+      </button>
+    </div>
+
+    <div class="settings-actions">
+      <button class="btn btn-danger" id="clear-cache-btn">
+        <i class="fas fa-trash"></i>
+        Clear Cache
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Load current settings
+    async function loadSettings() {
+      const stored = await chrome.storage.local.get('cloudlock_settings');
+      const settings = stored.cloudlock_settings || {};
+      
+      // Set toggle switches
+      document.getElementById('autoFill').checked = settings.autoFill !== false;
+      document.getElementById('autoFillOnLoad').checked = settings.autoFillOnLoad !== false;
+      document.getElementById('breachCheck').checked = settings.breachCheck !== false;
+      document.getElementById('strengthIndicator').checked = settings.strengthIndicator !== false;
+      document.getElementById('shortcuts').checked = settings.shortcuts !== false;
+      document.getElementById('passwordlessRecommendations').checked = settings.passwordlessRecommendations !== false;
+      document.getElementById('showIcons').checked = settings.showIcons !== false;
+      
+      // Set select values
+      document.getElementById('autoLockMinutes').value = settings.autoLockMinutes || 30;
+      
+      // Load stats
+      loadStats();
+    }
+
+    // Load statistics
+    async function loadStats() {
+      const stats = await chrome.storage.local.get(['cloudlock_passwords', 'cloudlock_stats']);
+      const passwords = stats.cloudlock_passwords || [];
+      const appStats = stats.cloudlock_stats || { autofills: 0, generated: 0 };
+      
+      document.getElementById('total-passwords').textContent = passwords.length;
+      document.getElementById('sites-autofilled').textContent = appStats.autofills || 0;
+      document.getElementById('passwords-generated').textContent = appStats.generated || 0;
+    }
+
+    // Save settings
+    async function saveSettings() {
+      const settings = {
+        autoFill: document.getElementById('autoFill').checked,
+        autoFillOnLoad: document.getElementById('autoFillOnLoad').checked,
+        breachCheck: document.getElementById('breachCheck').checked,
+        strengthIndicator: document.getElementById('strengthIndicator').checked,
+        shortcuts: document.getElementById('shortcuts').checked,
+        passwordlessRecommendations: document.getElementById('passwordlessRecommendations').checked,
+        showIcons: document.getElementById('showIcons').checked,
+        autoLockMinutes: parseInt(document.getElementById('autoLockMinutes').value)
+      };
+      
+      await chrome.storage.local.set({ cloudlock_settings: settings });
+      
+      showStatusMessage('Settings saved successfully!', 'success');
+    }
+
+    // Reset to defaults
+    async function resetSettings() {
+      if (!confirm('Reset all settings to defaults?')) return;
+      
+      const defaults = {
+        autoFill: true,
+        autoFillOnLoad: true,
+        breachCheck: true,
+        strengthIndicator: true,
+        shortcuts: true,
+        passwordlessRecommendations: true,
+        showIcons: true,
+        autoLockMinutes: 30
+      };
+      
+      await chrome.storage.local.set({ cloudlock_settings: defaults });
+      await loadSettings();
+      
+      showStatusMessage('Settings reset to defaults', 'success');
+    }
+
+    // Clear cache
+    async function clearCache() {
+      if (!confirm('Clear all cached data? You will need to log in again.')) return;
+      
+      await chrome.storage.local.remove(['cloudlock_passwords', 'cloudlock_token']);
+      
+      showStatusMessage('Cache cleared successfully', 'success');
+      setTimeout(() => loadStats(), 500);
+    }
+
+    // Show status message
+    function showStatusMessage(message, type) {
+      const statusEl = document.getElementById('status-message');
+      statusEl.textContent = message;
+      statusEl.className = `status-message ${type}`;
+      statusEl.style.display = 'flex';
+      
+      setTimeout(() => {
+        statusEl.style.display = 'none';
+      }, 3000);
+    }
+
+    // Event listeners
+    document.getElementById('save-btn').addEventListener('click', saveSettings);
+    document.getElementById('reset-btn').addEventListener('click', resetSettings);
+    document.getElementById('clear-cache-btn').addEventListener('click', clearCache);
+
+    // Load settings on page load
+    loadSettings();
+  </script>
+</body>
+</html>

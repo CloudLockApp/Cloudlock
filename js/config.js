@@ -14,7 +14,7 @@ const CONFIG = {
     
     // OpenRouter AI Configuration
     openrouter: {
-        apiKey: "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"
+        apiKey: "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"
     },
     
     // HaveIBeenPwned Configuration

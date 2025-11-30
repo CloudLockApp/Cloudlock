@@ -21,26 +21,81 @@ let authToken = null;
 // Initialize extension
 chrome.runtime.onInstalled.addListener(() => {
   console.log('CloudLock extension installed');
-  
+
   // Create context menu
   chrome.contextMenus.create({
     id: 'cloudlock-fill',
     title: 'Fill with CloudLock',
     contexts: ['editable']
   });
-  
+
   chrome.contextMenus.create({
     id: 'cloudlock-generate',
     title: 'Generate Password',
     contexts: ['editable']
   });
-  
+
   chrome.contextMenus.create({
     id: 'cloudlock-save',
     title: 'Save to CloudLock',
     contexts: ['editable']
   });
 });
+
+// Restore session on startup
+chrome.runtime.onStartup.addListener(async () => {
+  console.log('CloudLock: Restoring session...');
+  await restoreSession();
+});
+
+// Also restore session when service worker wakes up
+(async function initializeOnLoad() {
+  console.log('CloudLock: Service worker initialized');
+  await restoreSession();
+})();
+
+// Restore authenticated session from storage
+async function restoreSession() {
+  try {
+    const stored = await chrome.storage.local.get([
+      'cloudlock_user',
+      'cloudlock_uid',
+      'cloudlock_token',
+      'cloudlock_session_key',
+      'cloudlock_passwords'
+    ]);
+
+    if (stored.cloudlock_token && stored.cloudlock_uid && stored.cloudlock_user) {
+      authToken = stored.cloudlock_token;
+      sessionKey = stored.cloudlock_session_key;
+
+      authenticatedUser = {
+        email: stored.cloudlock_user,
+        uid: stored.cloudlock_uid,
+        timestamp: Date.now()
+      };
+
+      // Load cached passwords
+      if (stored.cloudlock_passwords) {
+        cachedPasswords = stored.cloudlock_passwords;
+        console.log(`✅ Session restored with ${cachedPasswords.length} cached passwords`);
+      }
+
+      // Try to sync passwords from Firestore in background
+      syncPasswords().catch(err => {
+        console.log('Background sync failed, using cached passwords:', err.message);
+      });
+
+      return true;
+    } else {
+      console.log('No stored session found');
+      return false;
+    }
+  } catch (error) {
+    console.error('Failed to restore session:', error);
+    return false;
+  }
+}
 
 // Handle context menu clicks
 chrome.contextMenus.onClicked.addListener((info, tab) => {
@@ -130,18 +185,19 @@ async function handleAuthentication(credentials) {
     authToken = data.idToken;
     
     // Store credentials in Chrome storage
-    await chrome.storage.local.set({ 
+    await chrome.storage.local.set({
       cloudlock_user: credentials.email,
       cloudlock_uid: data.localId,
-      cloudlock_token: authToken
+      cloudlock_token: authToken,
+      cloudlock_session_key: credentials.password
     });
-    
+
     authenticatedUser = {
       email: credentials.email,
       uid: data.localId,
       timestamp: Date.now()
     };
-    
+
     // Store master password for CryptoJS decryption (same as web app)
     sessionKey = credentials.password;
     
@@ -368,11 +424,12 @@ async function logout() {
   cachedPasswords = [];
   sessionKey = null;
   authToken = null;
-  
+
   await chrome.storage.local.remove([
     'cloudlock_user',
     'cloudlock_uid',
     'cloudlock_token',
+    'cloudlock_session_key',
     'cloudlock_passwords'
   ]);
 }
@@ -406,13 +463,187 @@ function generateSecurePassword(options = {}) {
   return password;
 }
 
-// Auto-lock after 30 minutes
-setInterval(() => {
+// ============================================
+// ANALYTICS & STATS TRACKING
+// ============================================
+
+// Track extension usage stats
+async function trackStat(statType) {
+  try {
+    const stored = await chrome.storage.local.get('cloudlock_stats');
+    const stats = stored.cloudlock_stats || {
+      autofills: 0,
+      generated: 0,
+      breachChecks: 0,
+      passwordsSaved: 0,
+      lastReset: Date.now()
+    };
+
+    // Reset daily
+    const daysSinceReset = (Date.now() - stats.lastReset) / (24 * 60 * 60 * 1000);
+    if (daysSinceReset >= 1) {
+      stats.autofills = 0;
+      stats.lastReset = Date.now();
+    }
+
+    switch (statType) {
+      case 'autofill':
+        stats.autofills = (stats.autofills || 0) + 1;
+        break;
+      case 'generated':
+        stats.generated = (stats.generated || 0) + 1;
+        break;
+      case 'breachCheck':
+        stats.breachChecks = (stats.breachChecks || 0) + 1;
+        break;
+      case 'passwordSaved':
+        stats.passwordsSaved = (stats.passwordsSaved || 0) + 1;
+        break;
+    }
+
+    await chrome.storage.local.set({ cloudlock_stats: stats });
+  } catch (error) {
+    console.error('Failed to track stat:', error);
+  }
+}
+
+// Update savePassword to track stats
+const originalSavePassword = savePassword;
+async function savePasswordWithStats(data) {
+  const result = await originalSavePassword(data);
+  await trackStat('passwordSaved');
+  return result;
+}
+
+// Update generateSecurePassword to track stats
+const originalGeneratePassword = generateSecurePassword;
+function generateSecurePasswordWithStats(options = {}) {
+  const password = originalGeneratePassword(options);
+  trackStat('generated');
+  return password;
+}
+
+// Auto-lock with configurable timeout
+setInterval(async () => {
   if (authenticatedUser) {
+    const settings = await chrome.storage.local.get('cloudlock_settings');
+    const autoLockMinutes = settings.cloudlock_settings?.autoLockMinutes || 30;
+
+    if (autoLockMinutes === -1) return; // Never lock
+
     const elapsed = Date.now() - authenticatedUser.timestamp;
-    if (elapsed > 30 * 60 * 1000) {
+    if (elapsed > autoLockMinutes * 60 * 1000) {
       logout();
       chrome.runtime.sendMessage({ action: 'sessionExpired' }).catch(() => {});
     }
   }
 }, 60000);
+
+// ============================================
+// ENHANCED COMMANDS HANDLING
+// ============================================
+
+// Listen for keyboard shortcuts
+chrome.commands.onCommand.addListener(async (command) => {
+  const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+
+  if (command === 'fill-password') {
+    chrome.tabs.sendMessage(tab.id, { action: 'showPasswordList' });
+  } else if (command === 'generate-password') {
+    const password = generateSecurePasswordWithStats();
+    chrome.tabs.sendMessage(tab.id, {
+      action: 'fillPassword',
+      password: password
+    });
+  }
+});
+
+// ============================================
+// PASSWORD HEALTH ANALYSIS
+// ============================================
+
+// Analyze password vault health
+async function analyzePasswordHealth() {
+  if (cachedPasswords.length === 0) {
+    return {
+      score: 100,
+      issues: [],
+      recommendations: []
+    };
+  }
+
+  const issues = [];
+  const recommendations = [];
+  let score = 100;
+
+  // Check for duplicate passwords
+  const passwordMap = new Map();
+  cachedPasswords.forEach(p => {
+    if (!passwordMap.has(p.password)) {
+      passwordMap.set(p.password, []);
+    }
+    passwordMap.get(p.password).push(p.siteName);
+  });
+
+  const duplicates = Array.from(passwordMap.entries())
+    .filter(([_, sites]) => sites.length > 1);
+
+  if (duplicates.length > 0) {
+    score -= duplicates.length * 10;
+    issues.push(`${duplicates.length} duplicate password(s) found`);
+    recommendations.push('Use unique passwords for each site');
+  }
+
+  // Check for weak passwords
+  const weakPasswords = cachedPasswords.filter(p => {
+    return p.password.length < 8 ||
+           !/[A-Z]/.test(p.password) ||
+           !/[a-z]/.test(p.password) ||
+           !/[0-9]/.test(p.password);
+  });
+
+  if (weakPasswords.length > 0) {
+    score -= weakPasswords.length * 5;
+    issues.push(`${weakPasswords.length} weak password(s) detected`);
+    recommendations.push('Update weak passwords to strong ones');
+  }
+
+  // Check for old passwords (not updated in 6 months)
+  const sixMonthsAgo = Date.now() - (180 * 24 * 60 * 60 * 1000);
+  const oldPasswords = cachedPasswords.filter(p => {
+    const updatedAt = p.updatedAt ? new Date(p.updatedAt).getTime() : 0;
+    return updatedAt < sixMonthsAgo;
+  });
+
+  if (oldPasswords.length > 3) {
+    score -= 10;
+    issues.push(`${oldPasswords.length} passwords not updated in 6+ months`);
+    recommendations.push('Regularly update your passwords');
+  }
+
+  score = Math.max(0, score);
+
+  return {
+    score,
+    issues,
+    recommendations,
+    stats: {
+      total: cachedPasswords.length,
+      weak: weakPasswords.length,
+      duplicates: duplicates.length,
+      old: oldPasswords.length
+    }
+  };
+}
+
+// Add health check to message listener
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'analyzeHealth') {
+    analyzePasswordHealth()
+      .then(health => sendResponse({ success: true, health }))
+      .catch(error => sendResponse({ success: false, error: error.message }));
+    return true;
+  }
+});
+
+console.log('CloudLock background script initialized with advanced features');

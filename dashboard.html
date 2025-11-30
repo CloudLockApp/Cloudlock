@@ -23,6 +23,7 @@
             animation: blink 1s infinite;
             opacity: 1;
             margin-left: 4px;
+            display: var(--cursor-visible, inline);
         }
         @keyframes blink {
             0%, 50%, 100% { opacity: 1; }
@@ -702,6 +703,12 @@
                                 element.textContent += text.charAt(i);
                                 i++;
                                 setTimeout(typing, speed);
+                            } else {
+                                // After typing is complete, wait 10 seconds then remove cursor
+                                setTimeout(() => {
+                                    // Remove the blinking cursor only
+                                    element.style.setProperty('--cursor-visible', 'none');
+                                }, 10000);
                             }
                         }
                         typing();

@@ -1,27 +1,32 @@
-/* CloudLock Extension Styles */
+/* CloudLock Extension Styles - Enhanced Modern Design */
 
 .cloudlock-icon {
   position: absolute;
   right: 10px;
   top: 50%;
   transform: translateY(-50%);
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   background: linear-gradient(135deg, #7c3aed, #a78bfa);
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 999999;
-  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.3);
-  transition: all 0.3s;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(10px);
 }
 
 .cloudlock-icon:hover {
   background: linear-gradient(135deg, #6d28d9, #8b5cf6);
-  transform: translateY(-50%) scale(1.1);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.5);
+  transform: translateY(-50%) scale(1.15) rotate(-5deg);
+  box-shadow: 0 8px 20px rgba(124, 58, 237, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.cloudlock-icon:active {
+  transform: translateY(-50%) scale(1.05);
 }
 
 .cloudlock-icon svg {
@@ -36,18 +41,33 @@
   background: linear-gradient(135deg, #059669, #047857);
 }
 
-/* Password Menu */
+/* Password Menu - Enhanced with Better Depth */
 .cloudlock-menu {
   position: absolute;
-  background: #1a1a2e;
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 16px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   z-index: 999999;
-  min-width: 300px;
-  max-height: 400px;
+  min-width: 320px;
+  max-height: 450px;
   overflow-y: auto;
-  backdrop-filter: blur(20px);
+  backdrop-filter: blur(30px) saturate(150%);
+  animation: menuSlideIn 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes menuSlideIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 .cloudlock-menu-header {
@@ -72,15 +92,38 @@
 .cloudlock-menu-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 15px;
+  gap: 14px;
+  padding: 14px 16px;
   cursor: pointer;
-  transition: all 0.2s;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  position: relative;
+  overflow: hidden;
+}
+
+.cloudlock-menu-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 4px;
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  transform: translateX(-4px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .cloudlock-menu-item:hover {
-  background: rgba(124, 58, 237, 0.15);
+  background: linear-gradient(90deg, rgba(124, 58, 237, 0.18), rgba(124, 58, 237, 0.08));
+  transform: translateX(4px);
+}
+
+.cloudlock-menu-item:hover::before {
+  transform: translateX(0);
+}
+
+.cloudlock-menu-item:active {
+  transform: scale(0.98);
 }
 
 .cloudlock-menu-item-icon {
@@ -182,19 +225,24 @@
   box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
 }
 
-/* Save Prompt */
+/* Save Prompt - Enhanced with Better Animation */
 .cloudlock-save-prompt {
   position: fixed;
   top: 20px;
   right: 20px;
-  background: #1a1a2e;
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  border-radius: 12px;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  background: linear-gradient(135deg, rgba(26, 26, 46, 0.98), rgba(22, 33, 62, 0.98));
+  border: 1px solid rgba(124, 58, 237, 0.4);
+  border-radius: 16px;
+  box-shadow:
+    0 20px 60px rgba(0, 0, 0, 0.6),
+    0 0 0 1px rgba(255, 255, 255, 0.05),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
   z-index: 999999;
-  width: 350px;
-  padding: 20px;
-  animation: slideInRight 0.3s ease;
+  width: 360px;
+  padding: 0;
+  animation: slideInRight 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  backdrop-filter: blur(30px) saturate(150%);
+  overflow: hidden;
 }
 
 @keyframes slideInRight {
@@ -212,9 +260,12 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 15px;
+  padding: 18px 20px;
+  background: rgba(124, 58, 237, 0.12);
+  border-bottom: 1px solid rgba(124, 58, 237, 0.2);
   color: #fff;
   font-weight: 600;
+  font-size: 0.95rem;
 }
 
 .cloudlock-save-prompt-header svg {
@@ -245,57 +296,99 @@
 
 .cloudlock-save-input {
   width: 100%;
-  padding: 10px;
+  padding: 12px 14px;
   background: rgba(15, 15, 35, 0.6);
-  border: 1px solid rgba(124, 58, 237, 0.3);
-  border-radius: 8px;
+  border: 2px solid rgba(124, 58, 237, 0.3);
+  border-radius: 10px;
   color: #fff;
   font-size: 0.9rem;
-  margin-bottom: 10px;
-  transition: all 0.3s;
+  margin-bottom: 12px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 }
 
 .cloudlock-save-input:focus {
   outline: none;
   border-color: #7c3aed;
-  background: rgba(15, 15, 35, 0.8);
+  background: rgba(15, 15, 35, 0.9);
+  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.1);
+  transform: translateY(-1px);
+}
+
+.cloudlock-save-input::placeholder {
+  color: rgba(255, 255, 255, 0.35);
 }
 
 .cloudlock-save-prompt-actions {
   display: flex;
   gap: 10px;
-  margin-top: 15px;
+  padding: 18px 20px;
+  background: rgba(15, 15, 35, 0.6);
+  border-top: 1px solid rgba(124, 58, 237, 0.15);
 }
 
 .cloudlock-save-prompt-btn {
   flex: 1;
-  padding: 10px;
+  padding: 12px 16px;
   border: none;
-  border-radius: 8px;
+  border-radius: 10px;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.3s;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  font-size: 0.9rem;
+  position: relative;
+  overflow: hidden;
+}
+
+.cloudlock-save-prompt-btn::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+  transform: translate(-50%, -50%);
+  transition: width 0.6s, height 0.6s;
+}
+
+.cloudlock-save-prompt-btn:hover::before {
+  width: 300px;
+  height: 300px;
 }
 
 .cloudlock-save-cancel {
-  background: rgba(255, 255, 255, 0.1);
-  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .cloudlock-save-cancel:hover {
-  background: rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.12);
   color: #fff;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+.cloudlock-save-cancel:active {
+  transform: scale(0.96);
 }
 
 .cloudlock-save-confirm {
   background: linear-gradient(135deg, #7c3aed, #a78bfa);
   color: #fff;
+  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.3);
 }
 
 .cloudlock-save-confirm:hover {
   background: linear-gradient(135deg, #6d28d9, #8b5cf6);
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(124, 58, 237, 0.4);
+  box-shadow: 0 6px 20px rgba(124, 58, 237, 0.5);
+}
+
+.cloudlock-save-confirm:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(124, 58, 237, 0.4);
 }
 
 .cloudlock-save-prompt-success {
@@ -312,20 +405,68 @@
   color: #10b981;
 }
 
-/* Scrollbar */
+/* Custom Scrollbar - Modern Design */
 .cloudlock-menu::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 .cloudlock-menu::-webkit-scrollbar-track {
-  background: rgba(15, 15, 35, 0.4);
+  background: rgba(15, 15, 35, 0.5);
+  border-radius: 10px;
 }
 
 .cloudlock-menu::-webkit-scrollbar-thumb {
-  background: rgba(124, 58, 237, 0.4);
-  border-radius: 4px;
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.5), rgba(167, 139, 250, 0.5));
+  border-radius: 10px;
+  border: 2px solid rgba(15, 15, 35, 0.5);
 }
 
 .cloudlock-menu::-webkit-scrollbar-thumb:hover {
-  background: rgba(124, 58, 237, 0.6);
+  background: linear-gradient(135deg, rgba(124, 58, 237, 0.7), rgba(167, 139, 250, 0.7));
+}
+
+.cloudlock-menu::-webkit-scrollbar-thumb:active {
+  background: linear-gradient(135deg, #7c3aed, #a78bfa);
+}
+
+/* Loading State Animation */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.cloudlock-menu-loading {
+  animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+/* Add glassmorphism effect to key elements */
+.cloudlock-menu,
+.cloudlock-save-prompt {
+  background-clip: padding-box;
+}
+
+/* Improved focus states for accessibility */
+.cloudlock-icon:focus-visible,
+.cloudlock-menu-item:focus-visible,
+.cloudlock-save-prompt-btn:focus-visible {
+  outline: 2px solid #a78bfa;
+  outline-offset: 2px;
+}
+
+/* Better disabled states */
+.cloudlock-menu-btn-small:disabled,
+.cloudlock-save-prompt-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+/* Smooth transitions for all interactive elements */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
