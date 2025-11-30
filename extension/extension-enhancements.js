@@ -128,17 +128,25 @@ async function handleFormSubmission(e) {
   if (!password) return;
 
   // Store for potential auto-save after successful login
-  CloudLockAdvanced.pendingSave = {
+  const pendingSave = {
     username,
     password,
-    form,
-    formData,
+    siteName: window.location.hostname,
+    url: window.location.href,
+    formType: formData.type,
     timestamp: Date.now()
   };
 
-  // Wait for navigation/success indication
+  CloudLockAdvanced.pendingSave = pendingSave;
+
+  // Store in chrome.storage so it persists across page redirects
+  chrome.storage.local.set({ cloudlock_pending_save: pendingSave });
+
+  // Check for successful login at multiple intervals
+  setTimeout(() => checkForSuccessfulLogin(form, formData), 500);
   setTimeout(() => checkForSuccessfulLogin(form, formData), 1000);
-  setTimeout(() => checkForSuccessfulLogin(form, formData), 2500);
+  setTimeout(() => checkForSuccessfulLogin(form, formData), 2000);
+  setTimeout(() => checkForSuccessfulLogin(form, formData), 3500);
 }
 
 // Check if login was successful
@@ -146,29 +154,59 @@ async function checkForSuccessfulLogin(form, formData) {
   if (!CloudLockAdvanced.pendingSave) return;
 
   const now = Date.now();
-  if (now - CloudLockAdvanced.pendingSave.timestamp > 5000) {
+  if (now - CloudLockAdvanced.pendingSave.timestamp > 8000) {
     CloudLockAdvanced.pendingSave = null;
+    chrome.storage.local.remove('cloudlock_pending_save');
     return;
   }
 
-  // Check for success indicators
+  // Check for success indicators (expanded list)
   const successIndicators = [
     () => !document.contains(form), // Form removed from DOM
     () => window.location.href !== formData.url, // Navigation occurred
-    () => document.querySelector('[class*="success"], [class*="welcome"]'), // Success message
-    () => !form.querySelector('.error, [class*="error"]') && formData.fields.password.value === '' // Field cleared without error
+    () => document.querySelector('[class*="success"], [class*="welcome"], [class*="dashboard"]'), // Success message/dashboard
+    () => document.querySelector('[class*="logout"], [class*="signout"], [class*="sign-out"]'), // Logout button appeared
+    () => !form.querySelector('.error, [class*="error"], [class*="invalid"]') && formData.fields.password?.value === '', // Field cleared without error
+    () => document.querySelector('[class*="profile"], [class*="account"], [class*="settings"]') // User profile elements
   ];
 
-  const isSuccess = successIndicators.some(check => check());
+  const isSuccess = successIndicators.some(check => {
+    try {
+      return check();
+    } catch (e) {
+      return false;
+    }
+  });
 
-  if (isSuccess && formData.type === 'login') {
+  if (isSuccess && (formData.type === 'login' || formData.type === 'unknown')) {
     showAutoSavePrompt(CloudLockAdvanced.pendingSave);
+    CloudLockAdvanced.pendingSave = null;
   }
 }
 
 // ============================================
 // 2. AUTO-SAVE PASSWORD PROMPT
 // ============================================
+
+// Check for pending save from previous page (after redirect)
+async function checkForPendingSave() {
+  const result = await chrome.storage.local.get('cloudlock_pending_save');
+  if (!result.cloudlock_pending_save) return;
+
+  const saveData = result.cloudlock_pending_save;
+  const now = Date.now();
+
+  // Only show if within 30 seconds of login (prevents stale prompts)
+  if (now - saveData.timestamp < 30000) {
+    // Wait a bit for page to fully load
+    setTimeout(() => {
+      showAutoSavePrompt(saveData);
+    }, 1500);
+  } else {
+    // Clean up old pending save
+    chrome.storage.local.remove('cloudlock_pending_save');
+  }
+}
 
 async function showAutoSavePrompt(saveData) {
   // Check if we already have this password saved
@@ -199,6 +237,7 @@ function displaySavePrompt(saveData) {
 
   const prompt = document.createElement('div');
   prompt.className = 'cloudlock-autosave-prompt';
+  prompt.style.zIndex = '2147483647'; // Maximum z-index to ensure visibility
   prompt.innerHTML = `
     <div class="cloudlock-autosave-content">
       <div class="cloudlock-autosave-header">
@@ -211,13 +250,13 @@ function displaySavePrompt(saveData) {
         <button class="cloudlock-autosave-close">×</button>
       </div>
       <div class="cloudlock-autosave-info">
-        <input type="text" class="cloudlock-autosave-input" placeholder="Site name" value="${window.location.hostname}" />
+        <input type="text" class="cloudlock-autosave-input" placeholder="Site name" value="${saveData.siteName || window.location.hostname}" />
         <input type="text" class="cloudlock-autosave-input" placeholder="Username" value="${escapeHtml(saveData.username)}" />
       </div>
       <div class="cloudlock-autosave-actions">
-        <button class="cloudlock-autosave-btn cloudlock-autosave-never">Never</button>
+        <button class="cloudlock-autosave-btn cloudlock-autosave-never">Never for this site</button>
         <button class="cloudlock-autosave-btn cloudlock-autosave-not-now">Not Now</button>
-        <button class="cloudlock-autosave-btn cloudlock-autosave-save">Save</button>
+        <button class="cloudlock-autosave-btn cloudlock-autosave-save">Save Password</button>
       </div>
     </div>
   `;
@@ -225,11 +264,16 @@ function displaySavePrompt(saveData) {
   document.body.appendChild(prompt);
 
   // Event listeners
-  prompt.querySelector('.cloudlock-autosave-close').addEventListener('click', () => prompt.remove());
-  prompt.querySelector('.cloudlock-autosave-not-now').addEventListener('click', () => prompt.remove());
+  const closePrompt = () => {
+    prompt.remove();
+    chrome.storage.local.remove('cloudlock_pending_save');
+  };
+
+  prompt.querySelector('.cloudlock-autosave-close').addEventListener('click', closePrompt);
+  prompt.querySelector('.cloudlock-autosave-not-now').addEventListener('click', closePrompt);
   prompt.querySelector('.cloudlock-autosave-never').addEventListener('click', async () => {
     await addToNeverSaveList(window.location.hostname);
-    prompt.remove();
+    closePrompt();
   });
   prompt.querySelector('.cloudlock-autosave-save').addEventListener('click', async () => {
     const inputs = prompt.querySelectorAll('.cloudlock-autosave-input');
@@ -1353,6 +1397,9 @@ document.head.appendChild(styleSheet);
 async function initializeEnhancements() {
   const settings = await loadSettings();
   CloudLockAdvanced.settings = settings;
+
+  // Check for pending password save (from previous page/login)
+  checkForPendingSave();
 
   // Enhanced form detection for SPAs
   enhancedFormDetection();

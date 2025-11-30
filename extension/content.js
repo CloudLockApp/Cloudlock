@@ -533,12 +533,15 @@ function showSavePrompt(password, username = '') {
   
   document.body.appendChild(prompt);
   
-  // Auto-remove after 30 seconds
+  // Ensure high z-index for visibility
+  prompt.style.zIndex = '2147483647';
+
+  // Auto-remove after 2 minutes (longer to give user more time)
   setTimeout(() => {
     if (document.body.contains(prompt)) {
       prompt.remove();
     }
-  }, 30000);
+  }, 120000);
 }
 
 // Confirm save (keep as window function for inline handler compatibility)
