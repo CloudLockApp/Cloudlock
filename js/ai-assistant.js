@@ -67,8 +67,9 @@ async function sendAIMessage() {
                 data?.choices?.[0]?.message?.content ||
                 "No response received.";
 
+            const formattedResponse = marked.parse(aiResponse);
             messagesContainer.innerHTML += `
-                <div class="ai-message bot">${aiResponse}</div>
+                <div class="ai-message bot">${formattedResponse}</div>
             `;
         } else {
             messagesContainer.innerHTML += `
@@ -230,7 +231,7 @@ async function unsecureDetector(passwordId) {
 
     aiElement.innerHTML = `
         <div class="alert" style="background: rgba(255,255,255,0.05); border-left: 3px solid #0af; padding: 8px; border-radius: 6px;">
-            <strong>🔍 AI Insight:</strong> ${insight}
+            <strong>🔍 AI Insight:</strong> ${marked.parse(insight)}
         </div>
     `;
     

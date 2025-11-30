@@ -385,6 +385,7 @@
     padding: 10px 15px;
     border-radius: 10px;
     max-width: 80%;
+    margin-left: 15px;
 }
 
 .ai-message.user {
@@ -406,6 +407,19 @@
 .ai-chat-input input {
     flex: 1;
 }
+
+.ai-message.bot ol,
+.ai-message.bot ul {
+    margin: 0 0 10px 16px;
+    padding: 0;
+}
+
+.alert ol,
+.alert ul {
+    margin: 0 0 10px 16px;
+    padding: 0;
+}
+
 
 /* Self Destruct Panel */
 .self-destruct-panel {
