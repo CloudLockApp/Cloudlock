@@ -14,7 +14,7 @@ const CONFIG = {
     
     // OpenRouter AI Configuration
     openrouter: {
-        apiKey: "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"
+        apiKey: // API Key saved in Netlify 
     },
     
     // HaveIBeenPwned Configuration
