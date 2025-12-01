@@ -833,27 +833,100 @@
             }
         }
 
-        function changeMasterPassword() {
-            var currentPassword = document.getElementById('current-password').value;
-            var newPassword = document.getElementById('new-password').value;
-            var confirmPassword = document.getElementById('confirm-new-password').value;
-            
+        // 🔐 Fully implemented master password change
+        async function changeMasterPassword() {
+            const currentPassword = document.getElementById('current-password').value;
+            const newPassword = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-new-password').value;
+
             if (!currentPassword || !newPassword || !confirmPassword) {
                 showToast('Please fill in all password fields', 'error');
                 return;
             }
-            
+
             if (newPassword !== confirmPassword) {
                 showToast('New passwords do not match', 'error');
                 return;
             }
-            
+
             if (newPassword.length < 8) {
                 showToast('Password must be at least 8 characters', 'error');
                 return;
             }
-            
-            showToast('Password change feature coming soon!', 'warning');
+
+            const user = firebase.auth().currentUser;
+            if (!user) {
+                showToast('You must be logged in to change your password', 'error');
+                return;
+            }
+
+            try {
+                // Re-authenticate user with current master password
+                const credential = firebase.auth.EmailAuthProvider.credential(
+                    user.email,
+                    currentPassword
+                );
+                await user.reauthenticateWithCredential(credential);
+
+                showToast('Re-encrypting your vault with the new master password...', 'info');
+
+                const uid = user.uid;
+
+                // 1) Fetch and decrypt all existing passwords using the OLD master password
+                const snapshot = await firebase.firestore()
+                    .collection('passwords')
+                    .where('userId', '==', uid)
+                    .get();
+
+                const passwordDocs = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    let plainPassword = data.password ? decrypt(data.password) : '';
+                    passwordDocs.push({
+                        id: doc.id,
+                        siteName: data.siteName,
+                        plainPassword: plainPassword
+                    });
+                });
+
+                // 2) Update Firebase Auth password
+                await user.updatePassword(newPassword);
+
+                // 3) Update encryption key to the NEW master password
+                encryptionKey = newPassword;
+
+                // 4) Re-encrypt each password with the new key and write back
+                if (passwordDocs.length > 0) {
+                    const batch = firebase.firestore().batch();
+                    passwordDocs.forEach(pwd => {
+                        const ref = firebase.firestore().collection('passwords').doc(pwd.id);
+                        batch.update(ref, {
+                            password: encrypt(pwd.plainPassword),
+                            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                    });
+                    await batch.commit();
+                }
+
+                // Clear form fields
+                document.getElementById('current-password').value = '';
+                document.getElementById('new-password').value = '';
+                document.getElementById('confirm-new-password').value = '';
+
+                showToast('Master password changed and vault re-encrypted successfully', 'success');
+            } catch (error) {
+                console.error('Error changing master password:', error);
+
+                let message = 'Failed to change master password.';
+                if (error.code === 'auth/wrong-password') {
+                    message = 'Current password is incorrect.';
+                } else if (error.code === 'auth/weak-password') {
+                    message = 'New password is too weak.';
+                } else if (error.code === 'auth/requires-recent-login') {
+                    message = 'Please log out and log back in, then try again.';
+                }
+                showToast(message, 'error');
+            }
         }
 
         async function toggle2FA(enabled) {
