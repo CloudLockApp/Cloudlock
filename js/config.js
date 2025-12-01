@@ -12,10 +12,7 @@ const CONFIG = {
         appId: "1:723019842397:web:886db24af7ed5587351eb4"
     },
     
-    // OpenRouter AI Configuration
-    openrouter: {
-        apiKey: // API Key saved in Netlify 
-    },
+    // OpenRouter API Key saved in Netlify
     
     // HaveIBeenPwned Configuration
     // Get your free API key at: https://haveibeenpwned.com/API/Key
