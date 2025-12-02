@@ -35,26 +35,15 @@ async function sendAIMessage() {
     `;
    
     try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const response = await fetch("/.netlify/functions/openrouter-proxy", {
             method: "POST",
-              headers: {
-                "Authorization": `Bearer ${CONFIG.openrouter.apiKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                "model": "alibaba/tongyi-deepresearch-30b-a3b:free",
-                "messages": [
-                  {
-                    "role": "system",
-                    "content": "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security. This is what the user wrote, please respond accordingly. Eighty words maximum for the AI response."
-                  },
-                  {
-                    "role": "user",
-                    "content": message
-                  }
-                ]
-              })
-            });
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                system: "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security. Eighty words maximum.",
+                user: message,
+                model: "alibaba/tongyi-deepresearch-30b-a3b:free"
+            })
+        });
 
        
         // Remove typing indicator
@@ -93,22 +82,15 @@ async function sendAIMessage() {
 // Openrouter Insight Summarizer
 async function generateAIInsight(aiSummary) {
     try {
-        const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        const response = await fetch("/.netlify/functions/openrouter-proxy", {
             method: "POST",
-              headers: {
-                "Authorization": `Bearer ${CONFIG.openrouter.apiKey}`,
-                "Content-Type": "application/json"
-              },
-              body: JSON.stringify({
-                "model": "alibaba/tongyi-deepresearch-30b-a3b:free",
-                "messages": [
-                  {
-                    "role": "user",
-                    "content": "Analyze how strong or weak the password is based only on its metadata. Eighty words maximum for the AI response: " + aiSummary
-                  }
-                ]
-              })
-            });
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                system: "You are a cybersecurity expert. Analyze how strong or weak the password is based only on its metadata. Eighty words maximum.",
+                user: "Analyze this password's metadata and give security insight: " + aiSummary,
+                model: "alibaba/tongyi-deepresearch-30b-a3b:free"
+            })
+        });
 
         const data = await response.json();
         return data?.choices?.[0]?.message?.content || "We have no insights right now.";
@@ -117,7 +99,6 @@ async function generateAIInsight(aiSummary) {
         return "⚠️ We cannot generate the OpenRouter AI Insight at the moment.";
     }
 }
-
 
 
 

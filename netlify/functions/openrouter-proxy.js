@@ -1,4 +1,4 @@
-export const handler = async (event) => {
+exports.handler = async (event) => {
   try {
     const body = JSON.parse(event.body);
 
@@ -9,9 +9,10 @@ export const handler = async (event) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "openai/gpt-4o-mini",
+        model: body.model,
         messages: [
-          { role: "user", content: body.message }
+          { role: "system", content: body.system },
+          { role: "user", content: body.user }
         ]
       })
     });
@@ -22,11 +23,10 @@ export const handler = async (event) => {
       statusCode: 200,
       body: JSON.stringify(data)
     };
-
-  } catch (error) {
+  } catch (err) {
     return {
       statusCode: 500,
-      body: JSON.stringify({ error: error.message })
+      body: JSON.stringify({ error: err.message })
     };
   }
 };
