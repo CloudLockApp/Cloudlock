@@ -130,11 +130,16 @@ function calculatePasswordStrength(password) {
     }
 
     // Deduct for repeated characters
-    for (let i = 1; i < password.length; i++) {
-        if (password[i] === password[i - 1]) {
-            strength -= 5;
+    const freq = {};
+    for (const char of password) {
+        freq[char] = (freq[char] || 0) + 1;
+    }
+    for (const char in freq){
+        if (freq[char] > 1){
+            strength -= (freq[char] - 1) * 5;
         }
     }
+
     if (/^[0-9]+$/.test(password)) strength -= 30; // Only numbers
     if (/^[a-zA-Z]+$/.test(password)) strength -= 30; // Only letters
 
