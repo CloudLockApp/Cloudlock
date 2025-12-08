@@ -8,7 +8,7 @@
 
 **Your Digital Identity, Secured with AI**
 
-[Video Demo](#video-demo) • [Documentation](#-getting-started) • [Features](#current-features) • [Team](#team)
+[Video Demo](#-video-demo) • [Documentation](#-getting-started) • [Features](#-current-features) • [Team](#-team)
 
 </div>
 
@@ -336,7 +336,10 @@ cloudlock/
 ---
 
 ## 🎥 Video Demo
+
 This is our video demo of CloudLock: https://www.youtube.com/watch?v=beK9R5daipw
+
+---
 
 ## 👥 Team 
 
