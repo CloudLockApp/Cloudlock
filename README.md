@@ -52,17 +52,17 @@ Built as a CPSC 491 Senior Capstone project at California State University, Full
 - ✅ **Copy to Clipboard**: One-click password copying
 - ✅ **Encrypted Notes**: Store additional secure information
 
-### 🤖 AI Integration (In Progress)
-- 🔄 **AI Security Assistant**: Chat with AI about password security
-- 🔄 **Password Strength Analysis**: AI-powered password evaluation
-- 🔄 **Security Recommendations**: Personalized security tips
+### 🤖 AI Integration 
+- ✅ **AI Security Assistant**: Chat with AI about password security
+- ✅ **Password Strength Analysis**: AI-powered password evaluation
+- ✅ **Security Recommendations**: Personalized security tips
 
 ### 🛡️ Security Features
 - ✅ **Dark Web Monitoring**: Simulated breach detection
 - ✅ **Password Health Dashboard**: Track weak and reused passwords
 - ✅ **Auto-Logout**: Session timeout after 30 minutes of inactivity
 - ✅ **Self-Destruct Mode**: Emergency credential deletion
-- 🔄 **2FA Support**: Two-factor authentication (coming soon)
+- ✅ **2FA Support**: Two-factor authentication 
 
 ---
 
@@ -92,19 +92,63 @@ Built as a CPSC 491 Senior Capstone project at California State University, Full
    rules_version = '2';
    service cloud.firestore {
      match /databases/{database}/documents {
+
+       // ===========================
+       // USERS COLLECTION
+       // ===========================
        match /users/{userId} {
-         allow read, write: if request.auth != null && request.auth.uid == userId;
+         // Authenticated user can manage their own document
+         allow create: if request.auth != null && request.auth.uid == userId;
+         allow read, update, delete: if request.auth != null && request.auth.uid == userId;
+
+         // Allow UNAUTHENTICATED read for password reset flow
+         // Allow listing by email to find user document
+         allow list: if request.auth == null && 
+                     request.query.limit == 1;
+  
+         // Allow getting specific document for reset flow
+         allow get: if request.auth == null;
        }
+
+       // ===========================
+       // PASSWORDS COLLECTION
+       // ===========================
        match /passwords/{passwordId} {
-         allow read: if request.auth != null && 
+         allow read: if request.auth != null &&
                         resource.data.userId == request.auth.uid;
-         allow create: if request.auth != null && 
+         allow create: if request.auth != null &&
                           request.resource.data.userId == request.auth.uid;
-         allow update, delete: if request.auth != null && 
+         allow update, delete: if request.auth != null &&
                                   resource.data.userId == request.auth.uid;
+
+         // History subcollection
+         match /history/{historyId} {
+           allow read, write: if request.auth != null &&
+             get(/databases/$(database)/documents/passwords/$(passwordId))
+               .data.userId == request.auth.uid;
+         }
        }
+
+       // ===========================
+       // SHARED PASSWORDS
+       // ===========================
+       match /shared-passwords/{shareToken} {
+         // Anyone with token can read
+         allow read: if true;
+
+         // Only owner can create or delete
+         allow create: if request.auth != null &&
+                          request.resource.data.ownerId == request.auth.uid;
+         allow delete: if request.auth != null &&
+                          resource.data.ownerId == request.auth.uid;
+
+         // Allow anonymous updates for tracking views
+         allow update: if true;
+       }
+
      }
    }
+
    ```
 
 4. **Create Firestore Index**
@@ -113,13 +157,13 @@ Built as a CPSC 491 Senior Capstone project at California State University, Full
      - Collection: `passwords`
      - Fields: `userId` (Ascending), `createdAt` (Descending)
 
-5. **Add AI Provider (Optional)**
-   - Get API key from [Google Gemini](https://ai.google.dev) (free)
+5. **Add AI Provider**
+   - Get API key from [OpenRouter](https://openrouter.ai) (free models available). Make sure not to reveal the key to the public.
    - Add to `js/config.js`:
    ```javascript
-   gemini: {
-       apiKey: 'YOUR_GEMINI_API_KEY'
-   }
+   openrouter: {
+       apiKey: "YOUR_OPENROUTER_API_KEY"
+   },
    ```
 
 6. **Deploy**
@@ -142,12 +186,13 @@ Built as a CPSC 491 Senior Capstone project at California State University, Full
 - Firebase Hosting
 
 **AI Integration:**
-- Google Gemini API (free tier)
-- Alternative: Claude AI, Groq, Hugging Face
+- OpenRouter API (free tier)
+- Alternative: Gemini, Claude AI, Groq, Hugging Face
 
 **Tools:**
 - Git & GitHub
 - GitHub Pages for deployment
+- Netlify
 - VS Code
 
 ---
@@ -156,23 +201,52 @@ Built as a CPSC 491 Senior Capstone project at California State University, Full
 
 ```
 cloudlock/
-├── index.html              # Main application page
+├── extension/                 # CloudLock browser extension folder
 ├── js/
-│   ├── config.js          # Firebase & API configuration
-│   ├── firebase-init.js   # Firebase initialization
-│   ├── auth.js            # Authentication logic
-│   ├── password-manager.js # Password CRUD operations
-│   ├── security-monitor.js # Security features
-│   ├── ai-assistant.js    # AI chat integration
-│   ├── encryption.js      # AES encryption functions
-│   ├── ui-utils.js        # UI helper functions
-│   ├── interactive-background.js # Animated background
-│   └── app.js             # Main app logic
+|   ├── advanced-generator.js  # Password generator
+|   ├── ai-assistant.js        # AI integration
+|   ├── app.js                 # Main app logic
+|   ├── audit-log.js     
+|   ├── auth.js                # Authentication logic  
+│   ├── config.js              # Firebase & API configuration
+|   ├── encryption.js          # AES encryption functions
+|   |── enhanced-auth.js    
+│   ├── firebase-init.js       # Firebase initialization
+│   ├── hibp-integration.js    # HaveIBeenPwned integration
+|   ├── interactive-background.js   # Animated background
+|   ├── nav-ticker.js          # Security articles integration
+│   ├── password-manager.js    # Password CRUD operations
+|   ├── password-sharing.js    # Password sharing
+|   ├── reset-password.js      # Password reset
+|   ├── reset.js               # Password reset
+|   ├── security-insights.js   # Password security tips
+│   ├── security-monitor.js    # Security features
+│   └── ui-utils.js            # UI helper functions
+│   
+├── netlify/functions/
+|   └── openrouter-proxy.js    # OpenRouter API key in Netlify
+|   
 ├── styles/
-│   ├── main.css           # Core styles
-│   ├── components.css     # Component styles
-│   └── animations.css     # Animation styles
-└── README.md              # This file
+|   ├── animations.css        # Animation styles
+|   ├── audit-log.css         # Audit log styles
+|   ├── circular-score.css    # Circular score styles
+|   ├── components.css        # Component styles
+|   ├── enhanced-auth.css     # Enhanced auth styles
+|   ├── landing.css           # Landing page style
+│   ├── main.css              # Core styles
+│   ├── nav-ticker.css        # News articles styles
+|   ├── password-sharing.css  # Password sharing styles
+│   └── security-insights.css # Security insights styles
+|
+├── .gitignore                # Git ignored files
+├── CNAME                     # Canonical name
+├── README.md                 # This file
+├── dashboard.html            # Dashboard page UI
+├── index.html                # Main application page
+├── login.html                # Login page UI
+├── reset-password.html       # Reset page UI in email link
+├── reset.html                # Main reset page UI
+└── shared.html               # Shared password page UI
 ```
 
 ---
@@ -238,27 +312,26 @@ cloudlock/
 - [x] Search functionality
 - [x] Password strength validation
 
-### Phase 2: Enhanced Security (🔄 In Progress)
+### Phase 2: Enhanced Security (✅ Complete)
 - [x] Dark web monitoring
 - [x] Security dashboard
 - [x] Auto-logout
-- [ ] 2FA implementation
-- [ ] Password rotation alerts
-- [ ] Breach notifications
+- [x] 2FA implementation
+- [x] Password rotation alerts
+- [x] Breach notifications
 
-### Phase 3: Advanced Features (📅 Planned)
-- [ ] Browser extension
+### Phase 3: Advanced Features (✅ Complete)
+- [x] Browser extension
 - [ ] Mobile apps (iOS/Android)
-- [ ] Password sharing
+- [x] Password sharing
+- [x] Security score analytics
 - [ ] Family vault
 - [ ] Import/export functionality
 - [ ] Biometric authentication
 
-### Phase 4: AI & Intelligence (📅 Future)
-- [ ] Full AI security assistant
-- [ ] Predictive breach detection
-- [ ] Smart password suggestions
-- [ ] Security score analytics
+### Phase 4: AI & Intelligence (✅ Complete)
+- [x] Full AI security assistant chatbot
+- [x] Smart password suggestions
 
 ---
 
@@ -269,7 +342,7 @@ cloudlock/
 | Name | Role | GitHub | Contributions |
 |------|------|--------|---------------|
 | **Ryan Trinh** | Lead Developer | [@spill](https://github.com/spill) | Core architecture, Firebase integration, UI/UX |
-| **Brian Wei** | Developer | [@brianwei23](https://github.com/brianwei23) | Feature development, testing, AI integration |
+| **Brian Wei** | Developer | [@brianwei23](https://github.com/brianwei23) | AI integration, security score, password recovery, documentation |
 | **Christian Ward** | Developer | [@christian](https://github.com/christian) | Documentation, security features |
 
 **Course:** CPSC 491 - Senior Capstone Project in Computer Science  
@@ -301,7 +374,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 - **Professor:** Rong Jin - CPSC 491 instructor
 - **Inspiration:** 1Password, LastPass, Bitwarden
-- **Technologies:** Firebase, Google Gemini AI, Font Awesome
+- **Technologies:** Firebase, OpenRouter API, Netlify, Font Awesome
 - **Community:** Stack Overflow, GitHub, MDN Web Docs
 
 ---
