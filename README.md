@@ -8,13 +8,13 @@
 
 **Your Digital Identity, Secured with AI**
 
-[Live Demo](#) • [Documentation](#-getting-started) • [Features](#-key-features) • [Team](#-team)
+[Video Demo](#video-demo) • [Documentation](#-getting-started) • [Features](#current-features) • [Team](#team)
 
 </div>
 
 ---
 
-## 📋 Overview
+## 📋 Overview 
 
 CloudLock is a modern, AI-powered password manager built with security and usability in mind. Featuring end-to-end encryption, real-time password strength validation, dark web monitoring, and an AI security assistant, CloudLock helps you manage your digital credentials safely and efficiently.
 
@@ -335,7 +335,10 @@ cloudlock/
 
 ---
 
-## 👥 Team
+## 🎥 Video Demo
+This is our video demo of CloudLock: https://www.youtube.com/watch?v=beK9R5daipw
+
+## 👥 Team 
 
 <div align="center">
 
@@ -343,7 +346,7 @@ cloudlock/
 |------|------|--------|---------------|
 | **Ryan Trinh** | Lead Developer | [@spill](https://github.com/spill) | Core architecture, Firebase integration, UI/UX |
 | **Brian Wei** | Developer | [@brianwei23](https://github.com/brianwei23) | AI integration, security score, password recovery, documentation |
-| **Christian Ward** | Developer | [@christian](https://github.com/christian) | Documentation, security features |
+| **Christian Ward** | Developer | [@chrisward62](https://github.com/chrisward62) | Documentation, security features |
 
 **Course:** CPSC 491 - Senior Capstone Project in Computer Science  
 **Institution:** California State University, Fullerton  
