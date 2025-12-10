@@ -39,9 +39,9 @@ async function sendAIMessage() {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                system: "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security. Eighty words maximum.",
+                system: "You are a cybersecurity expert that is giving tips to someone creating passwords and concerned about online security. This is what the user wrote, please respond accordingly. IMPORTANT INSTRUCTION: FIFTY WORDS MAXIMUM FOR ENTIRE RESPONSE. NO EXCEPTIONS TO WORD LIMIT RULE.",
                 user: message,
-                model: "alibaba/tongyi-deepresearch-30b-a3b:free"
+                model: "nvidia/nemotron-nano-9b-v2:free"
             })
         });
 
@@ -86,9 +86,9 @@ async function generateAIInsight(aiSummary) {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                system: "You are a cybersecurity expert. Analyze how strong or weak the password is based only on its metadata. Eighty words maximum.",
-                user: "Analyze this password's metadata and give security insight: " + aiSummary,
-                model: "alibaba/tongyi-deepresearch-30b-a3b:free"
+                system: "Analyze how strong or weak the password is based only on its metadata. Give 1-2 simple, short tips to improve. IMPORTANT INSTRUCTION: FIFTY WORDS MAXIMUM FOR ENTIRE RESPONSE. NO EXCEPTIONS TO WORD LIMIT RULE.: ",
+                user: "Analyze how strong or weak the password is based only on its metadata. Give 1-2 simple, short tips to improve. IMPORTANT INSTRUCTION: FIFTY WORDS MAXIMUM FOR ENTIRE RESPONSE. NO EXCEPTIONS TO WORD LIMIT RULE.: " + aiSummary,
+                model: "nvidia/nemotron-nano-9b-v2:free"
             })
         });
 
